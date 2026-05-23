@@ -205,20 +205,40 @@ function renderMarquee(logos) {
   track.innerHTML = `${set}<div class="marquee__set" aria-hidden="true">${items}</div>`;
 }
 
+function vimeoInlineSrc(id) {
+  return `https://player.vimeo.com/video/${id}?background=1&autoplay=1&loop=1&muted=1&playsinline=1&controls=0&title=0&byline=0&portrait=0&dnt=1`;
+}
+
+function heroVideoCardDesktop(id) {
+  const src = vimeoInlineSrc(id);
+  return `<article class="hero-video-card" data-vimeo="${id}">
+      <div class="hero-video-card__media">
+        <img class="hero-video-card__poster" src="https://vumbnail.com/${id}.jpg" alt="" loading="lazy" decoding="async">
+        <div class="hero-video-card__player">
+          <iframe class="hero-video-card__iframe" data-vimeo-src="${src}"
+            allow="autoplay; fullscreen; picture-in-picture" allowfullscreen title=""></iframe>
+        </div>
+      </div>
+    </article>`;
+}
+
+function heroVideoCardMobile(id, thumbMap = {}) {
+  const poster = thumbMap[id] || `https://vumbnail.com/${id}.jpg`;
+  return `<article class="hero-video-card" data-vimeo="${id}" role="button" tabindex="0" aria-label="Lire la vidéo">
+      <div class="hero-video-card__media">
+        <img src="${poster}" alt="" loading="eager" decoding="sync">
+        <span class="hero-video-card__play" aria-hidden="true"></span>
+      </div>
+    </article>`;
+}
+
 function renderHeroVideos(ids, thumbMap = {}) {
   const topTrack = document.getElementById("hero-video-track-top");
   const bottomTrack = document.getElementById("hero-video-track-bottom");
   if (!topTrack || !bottomTrack || !ids.length) return;
 
   const mobile = isMobileLayout();
-  const poster = (id) => thumbMap[id] || `https://vumbnail.com/${id}.jpg`;
-  const card = (id) =>
-    `<article class="hero-video-card" data-vimeo="${id}" role="button" tabindex="0" aria-label="Lire la vidéo">
-      <div class="hero-video-card__media">
-        <img src="${poster(id)}" alt="" loading="${mobile ? "eager" : "lazy"}" decoding="${mobile ? "sync" : "async"}">
-        <span class="hero-video-card__play" aria-hidden="true"></span>
-      </div>
-    </article>`;
+  const card = mobile ? (id) => heroVideoCardMobile(id, thumbMap) : (id) => heroVideoCardDesktop(id);
 
   const fillTrack = (track, videoIds) => {
     const set = videoIds.map(card).join("");
@@ -227,6 +247,44 @@ function renderHeroVideos(ids, thumbMap = {}) {
 
   fillTrack(topTrack, ids.slice(0, HERO_VIDEOS_TOP));
   fillTrack(bottomTrack, ids.slice(HERO_VIDEOS_TOP, HERO_VIDEOS_TOP + HERO_VIDEOS_BOTTOM));
+}
+
+function loadHeroIframe(iframe) {
+  const src = iframe.dataset.vimeoSrc;
+  if (!src || iframe.src) return;
+  iframe.src = src;
+  iframe.addEventListener(
+    "load",
+    () => iframe.closest(".hero-video-card__media")?.classList.add("is-playing"),
+    { once: true }
+  );
+}
+
+function initHeroVimeoLazy() {
+  const cap = 4;
+  let loaded = 0;
+
+  document.querySelectorAll(".hero-video-card__iframe[data-vimeo-src]").forEach((iframe) => {
+    if (loaded < cap) {
+      loadHeroIframe(iframe);
+      loaded += 1;
+    }
+  });
+
+  const io = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        loadHeroIframe(entry.target);
+        io.unobserve(entry.target);
+      });
+    },
+    { root: null, rootMargin: "200px", threshold: 0.08 }
+  );
+
+  document.querySelectorAll(".hero-video-card__iframe[data-vimeo-src]").forEach((iframe) => {
+    if (!iframe.src) io.observe(iframe);
+  });
 }
 
 function initRowPause(container, rowSelector) {
@@ -241,7 +299,11 @@ function initHeroVideoCarousel() {
   const wrap = document.getElementById("hero-videos");
   if (!wrap) return;
 
-  initRowPause(wrap, ".hero-videos__row");
+  if (!isMobileLayout()) {
+    initRowPause(wrap, ".hero-videos__row");
+    initHeroVimeoLazy();
+    return;
+  }
 
   wrap.querySelectorAll(".hero-video-card").forEach((card) => {
     card.addEventListener("click", () => openVideo(card.dataset.vimeo));

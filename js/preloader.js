@@ -1,7 +1,7 @@
 /**
- * Loading screen — visible from first paint, minimum 5s from page load
+ * Loading screen — visible from first paint, minimum 3s from page load
  */
-const MIN_MS = 5000;
+const MIN_MS = 3000;
 export const MOBILE_MQ = "(max-width: 900px)";
 
 export function isMobileLayout() {

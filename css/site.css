@@ -495,7 +495,6 @@ html.is-inapp body {
 .hero-videos__track {
   display: flex;
   width: max-content;
-  transform: translate3d(0, 0, 0);
   will-change: transform;
   pointer-events: none;
 }
@@ -561,20 +560,56 @@ html.is-inapp body {
   overflow: hidden;
 }
 
-.hero-video-card__media img {
+.hero-video-card__media img,
+.hero-video-card__poster {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
+.hero-video-card__poster {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  transition: opacity 0.4s;
+}
+
+.hero-video-card__media.is-playing .hero-video-card__poster {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.hero-video-card__player {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+}
+
+.hero-video-card__player iframe {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  height: 100%;
+  min-width: 100%;
+  min-height: 100%;
+  border: 0;
+  transform: translate(-50%, -50%) scale(1.2);
+  pointer-events: none;
+}
+
+.hero-video-card__media:has(.hero-video-card__player) .hero-video-card__play {
+  display: none;
+}
+
 @keyframes heroVideoMarqueeFwd {
-  from { transform: translateX(0); }
-  to { transform: translateX(-50%); }
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(-50%, 0, 0); }
 }
 
 @keyframes heroVideoMarqueeRev {
-  from { transform: translateX(-50%); }
-  to { transform: translateX(0); }
+  from { transform: translate3d(-50%, 0, 0); }
+  to { transform: translate3d(0, 0, 0); }
 }
 
 /* Process timeline */
@@ -803,7 +838,7 @@ html.is-inapp body {
   to { transform: translateX(-50%); }
 }
 
-/* Site preloader — 5s logo + progress line (see js/preloader.js) */
+/* Site preloader — 3s logo + progress line (see js/preloader.js) */
 html.is-loading {
   overflow: hidden;
 }
@@ -901,7 +936,7 @@ html.is-loading .bg-texture {
   background: linear-gradient(90deg, rgba(110, 190, 255, 0.85), #fff);
   transform: scaleX(0);
   transform-origin: left center;
-  animation: preloader-progress var(--preloader-duration, 5s) linear forwards;
+  animation: preloader-progress var(--preloader-duration, 3s) linear forwards;
 }
 
 @keyframes preloader-progress {
@@ -1983,11 +2018,6 @@ body.lightbox-open {
     contain: none !important;
     mask-image: none !important;
     -webkit-mask-image: none !important;
-  }
-
-  .hero-videos__track {
-    transform: none;
-    will-change: auto;
   }
 
   html.is-mobile-home #hero,
