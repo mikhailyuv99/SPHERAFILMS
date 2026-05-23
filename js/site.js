@@ -161,7 +161,6 @@ async function init() {
       const img = card.querySelector("img");
       if (url && img && img.src !== url) img.src = url;
     });
-    else syncHeroMarqueeLoops();
   }
   const vimeoThumbUrls = mobile ? vimeoIds.map((id) => thumbMap[id]).filter(Boolean) : [];
 
