@@ -161,7 +161,7 @@ async function init() {
       const img = card.querySelector("img");
       if (url && img && img.src !== url) img.src = url;
     });
-    if (mobile) initMobileHeroMarquees();
+    if (mobile) initMobileHeroMarquees({ reset: false });
     else syncHeroMarqueeLoops();
   }
   const vimeoThumbUrls = mobile ? vimeoIds.map((id) => thumbMap[id]).filter(Boolean) : [];
@@ -185,7 +185,7 @@ async function init() {
   await Promise.all([minWait, preloadWait]);
   if (mobile) {
     await waitForDomImages([".marquee", ".hero-videos"], { timeout: 22000 });
-    initMobileHeroMarquees();
+    initMobileHeroMarquees({ reset: false });
   }
   document.body.classList.add("site-ready");
   await finishPreloader();
@@ -222,14 +222,10 @@ function vimeoInlineSrc(id) {
 }
 
 function heroVideoCardDesktop(id) {
-  const src = vimeoInlineSrc(id);
   return `<article class="hero-video-card" data-vimeo="${id}">
       <div class="hero-video-card__media">
         <img class="hero-video-card__poster" src="https://vumbnail.com/${id}.jpg" alt="" loading="lazy" decoding="async">
-        <div class="hero-video-card__player">
-          <iframe class="hero-video-card__iframe" data-vimeo-src="${src}"
-            allow="autoplay; fullscreen; picture-in-picture" allowfullscreen title=""></iframe>
-        </div>
+        <div class="hero-video-card__player"></div>
       </div>
     </article>`;
 }
@@ -306,8 +302,17 @@ function startMobileHeroMarquee(track, direction) {
   mobileHeroMarquees.push(state);
 }
 
-function initMobileHeroMarquees() {
+function initMobileHeroMarquees({ reset = false } = {}) {
   if (!isMobileLayout()) return;
+
+  if (mobileHeroMarquees.length > 0 && !reset) {
+    mobileHeroMarquees.forEach((state) => {
+      const w = measureHeroLoop(state.track);
+      if (w > 0) state.loopW = w;
+    });
+    return;
+  }
+
   stopMobileHeroMarquees();
 
   const top = document.getElementById("hero-video-track-top");
@@ -355,49 +360,54 @@ function renderHeroVideos(ids, thumbMap = {}) {
   fillTrack(bottomTrack, ids.slice(HERO_VIDEOS_TOP, HERO_VIDEOS_TOP + HERO_VIDEOS_BOTTOM));
 
   requestAnimationFrame(() => {
-    if (isMobileLayout()) initMobileHeroMarquees();
-    else {
+    if (!isMobileLayout()) {
       syncHeroMarqueeLoops();
       requestAnimationFrame(() => syncHeroMarqueeLoops());
     }
   });
 }
 
-function loadHeroIframe(iframe) {
-  const src = iframe.dataset.vimeoSrc;
-  if (!src || iframe.src) return;
-  iframe.src = src;
-  iframe.addEventListener(
-    "load",
-    () => iframe.closest(".hero-video-card__media")?.classList.add("is-playing"),
-    { once: true }
-  );
+function unloadHeroVideo(card) {
+  const player = card.querySelector(".hero-video-card__player");
+  if (!player) return;
+  player.innerHTML = "";
+  card.querySelector(".hero-video-card__media")?.classList.remove("is-playing");
 }
 
-function initHeroVimeoLazy() {
-  const cap = 4;
-  let loaded = 0;
+function playHeroVideoOnHover(card) {
+  const id = card.dataset.vimeo;
+  if (!id) return;
+  const player = card.querySelector(".hero-video-card__player");
+  if (!player) return;
 
-  document.querySelectorAll(".hero-video-card__iframe[data-vimeo-src]").forEach((iframe) => {
-    if (loaded < cap) {
-      loadHeroIframe(iframe);
-      loaded += 1;
-    }
-  });
+  let iframe = player.querySelector("iframe");
+  if (!iframe) {
+    iframe = document.createElement("iframe");
+    iframe.className = "hero-video-card__iframe";
+    iframe.allow = "autoplay; fullscreen; picture-in-picture";
+    iframe.allowFullscreen = true;
+    iframe.title = "";
+    player.appendChild(iframe);
+  }
 
-  const io = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry) => {
-        if (!entry.isIntersecting) return;
-        loadHeroIframe(entry.target);
-        io.unobserve(entry.target);
-      });
-    },
-    { root: null, rootMargin: "200px", threshold: 0.08 }
-  );
+  const src = vimeoInlineSrc(id);
+  if (iframe.src !== src) {
+    iframe.src = src;
+    iframe.addEventListener(
+      "load",
+      () => card.querySelector(".hero-video-card__media")?.classList.add("is-playing"),
+      { once: true }
+    );
+  }
+}
 
-  document.querySelectorAll(".hero-video-card__iframe[data-vimeo-src]").forEach((iframe) => {
-    if (!iframe.src) io.observe(iframe);
+function initHeroVideoHoverPlay() {
+  const wrap = document.getElementById("hero-videos");
+  if (!wrap || isMobileLayout()) return;
+
+  wrap.querySelectorAll(".hero-video-card").forEach((card) => {
+    card.addEventListener("mouseenter", () => playHeroVideoOnHover(card));
+    card.addEventListener("mouseleave", () => unloadHeroVideo(card));
   });
 }
 
@@ -415,16 +425,21 @@ function initHeroVideoCarousel() {
 
   if (!isMobileLayout()) {
     initRowPause(wrap, ".hero-videos__row");
-    initHeroVimeoLazy();
+    initHeroVideoHoverPlay();
     return;
   }
 
   let resizeTimer;
+  let marqueeViewportW = window.innerWidth;
   window.addEventListener(
     "resize",
     () => {
       window.clearTimeout(resizeTimer);
-      resizeTimer = window.setTimeout(() => initMobileHeroMarquees(), 120);
+      resizeTimer = window.setTimeout(() => {
+        if (window.innerWidth === marqueeViewportW) return;
+        marqueeViewportW = window.innerWidth;
+        initMobileHeroMarquees({ reset: true });
+      }, 150);
     },
     { passive: true }
   );
@@ -439,7 +454,7 @@ function initHeroVideoCarousel() {
     });
   });
 
-  initMobileHeroMarquees();
+  initMobileHeroMarquees({ reset: true });
 }
 
 function openVideo(id) {
