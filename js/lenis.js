@@ -19,6 +19,7 @@
 
     function raf(t) {
       lenis.raf(t);
+      window.__siteTickers?.forEach((fn) => fn(t));
       requestAnimationFrame(raf);
     }
     requestAnimationFrame(raf);
