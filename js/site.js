@@ -441,10 +441,23 @@ function initHeroDragScroll(wrap) {
     pointerId: 0,
     startX: 0,
     startY: 0,
+    startTime: 0,
     startDragDelta: 0,
     state: null,
     viewport: null,
     card: null,
+  };
+
+  const isMobileDeliberateTap = (e) => {
+    const dx = e.clientX - drag.startX;
+    const dy = e.clientY - drag.startY;
+    const elapsed = performance.now() - drag.startTime;
+    return (
+      elapsed < 400 &&
+      Math.abs(dx) < 12 &&
+      Math.abs(dy) < 12 &&
+      Math.hypot(dx, dy) < 14
+    );
   };
 
   const finishDrag = (e) => {
@@ -467,7 +480,9 @@ function initHeroDragScroll(wrap) {
     wrap.classList.remove("is-dragging");
 
     if (card && !moved) {
-      openVideo(card.dataset.vimeo);
+      if (!isMobileLayout() || isMobileDeliberateTap(e)) {
+        openVideo(card.dataset.vimeo);
+      }
     }
 
     drag.active = false;
@@ -491,6 +506,7 @@ function initHeroDragScroll(wrap) {
     drag.pointerId = e.pointerId;
     drag.startX = e.clientX;
     drag.startY = e.clientY;
+    drag.startTime = performance.now();
     drag.startDragDelta = state.dragDelta;
     drag.state = state;
     drag.viewport = viewport;
@@ -512,7 +528,11 @@ function initHeroDragScroll(wrap) {
     const dx = e.clientX - drag.startX;
     const dy = e.clientY - drag.startY;
     if (!drag.moved && (Math.abs(dx) > 6 || Math.abs(dy) > 6)) {
-      drag.moved = Math.abs(dx) > Math.abs(dy) * 0.55 || Math.abs(dx) > 10;
+      if (isMobileLayout()) {
+        drag.moved = Math.abs(dy) > 8 || Math.abs(dx) > 12;
+      } else {
+        drag.moved = Math.abs(dx) > Math.abs(dy) * 0.55 || Math.abs(dx) > 10;
+      }
     }
 
     if (drag.moved) {
