@@ -3,7 +3,6 @@
  */
 (function () {
   if (document.documentElement.classList.contains("is-inapp")) return;
-  if (window.matchMedia("(max-width: 900px)").matches) return;
 
   const s = document.createElement("script");
   s.src = "https://unpkg.com/lenis@1.1.18/dist/lenis.min.js";

@@ -10,12 +10,11 @@ import {
   finishPreloader,
   preloadImages,
   collectGalleryPreloadUrls,
-  waitForSectionImages,
   isMobileLayout,
 } from "./preloader.js";
 
 async function init() {
-  const preloaderWait = startPreloader();
+  const minWait = startPreloader();
 
   let items = await loadGalleryPageOrder(GALLERY_EXCLUDE);
   items = uniqueGalleryItems(items, GALLERY_EXCLUDE);
@@ -25,7 +24,7 @@ async function init() {
 
   const grid = document.getElementById("gallery-grid");
   if (!grid) {
-    await Promise.all([preloaderWait]);
+    await minWait;
     await finishPreloader();
     return;
   }
@@ -34,7 +33,7 @@ async function init() {
     grid.innerHTML = `<p class="gallery-empty">Galerie en cours de chargement.</p>`;
     initHeader();
     initNavToggle();
-    await Promise.all([preloaderWait]);
+    await minWait;
     await finishPreloader();
     window.setTimeout(() => initScrollReveal(), 250);
     return;
@@ -74,8 +73,8 @@ async function init() {
   initHeader();
   initNavToggle();
 
-  await Promise.all([preloaderWait, preloadWait]);
-  await waitForSectionImages([".gallery-grid"], { timeout: 14000 });
+  await Promise.all([minWait, preloadWait]);
+  document.body.classList.add("site-ready");
   await finishPreloader();
   window.setTimeout(() => initScrollReveal(), 250);
 }

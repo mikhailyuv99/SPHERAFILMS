@@ -16,10 +16,8 @@ import {
   finishPreloader,
   preloadImages,
   collectHomePreloadUrls,
-  waitForSectionImages,
   isMobileLayout,
 } from "./preloader.js";
-import { initMobileRails } from "./mobile-rail.js";
 import { SOCIAL_ICONS } from "./social-icons.js";
 const MAP = "assets/media-map";
 const PHOTO_EXCLUDE = GALLERY_EXCLUDE;
@@ -98,7 +96,7 @@ function mergeCopy(copy) {
 }
 
 async function init() {
-  const preloaderWait = startPreloader();
+  const minWait = startPreloader();
 
   let copyData = { copy: FALLBACK_COPY, social: FALLBACK_SOCIAL, jotform: "" };
   let brands = { order: [] };
@@ -138,7 +136,7 @@ async function init() {
   const brandPaths = dedupe(brands.order || []);
   const preloadUrls = collectHomePreloadUrls(galleryItems, brandPaths, founders.photo, vimeoIds);
   const preloadWait = preloadImages(preloadUrls, {
-    limit: isMobileLayout() ? 50 : 24,
+    limit: isMobileLayout() ? 40 : 24,
   });
 
   renderMarquee(brandPaths);
@@ -153,13 +151,9 @@ async function init() {
   initFooterLogo();
   initFaq();
 
-  await Promise.all([preloaderWait, preloadWait]);
-  await waitForSectionImages([".marquee", ".hero-videos"], { timeout: 14000 });
-  initHeroVimeoLazy();
-
+  await Promise.all([minWait, preloadWait]);
   document.body.classList.add("site-ready");
   await finishPreloader();
-  initMobileRails();
   window.setTimeout(() => initScrollReveal(), 250);
 }
 
@@ -167,44 +161,18 @@ const LOGO_WHITE = new Set(["fc2f20543a9918c2f89d5674dd1518b0"]);
 
 function renderMarquee(logos) {
   const track = document.getElementById("marquee-track");
-  const marquee = track?.closest(".marquee");
   if (!track || !logos.length) return;
-
   const mobile = isMobileLayout();
   const items = logos
     .map((src, i) => {
       const white = LOGO_WHITE.has(stem(src)) ? " marquee__logo--white" : "";
-      const priority = mobile && i < 6 ? ' fetchpriority="high"' : "";
-      return `<img class="marquee__logo${white}" src="${src}" alt="" loading="eager" decoding="async"${priority}>`;
+      const load = mobile ? "eager" : "lazy";
+      const priority = mobile && i < 10 ? ' fetchpriority="high"' : "";
+      return `<img class="marquee__logo${white}" src="${src}" alt="" loading="${load}" decoding="async"${priority}>`;
     })
     .join("");
   const set = `<div class="marquee__set">${items}</div>`;
-
-  if (mobile) {
-    track.innerHTML = set;
-    marquee?.classList.add("js-touch-rail");
-  } else {
-    track.innerHTML = `${set}<div class="marquee__set" aria-hidden="true">${items}</div>`;
-    marquee?.classList.remove("js-touch-rail");
-  }
-}
-
-function vimeoInlineSrc(id) {
-  return `https://player.vimeo.com/video/${id}?background=1&autoplay=1&loop=1&muted=1&playsinline=1&controls=0&title=0&byline=0&portrait=0&dnt=1`;
-}
-
-function heroVideoCard(id) {
-  const src = vimeoInlineSrc(id);
-  return `<article class="hero-video-card" data-vimeo="${id}">
-      <div class="hero-video-card__media">
-        <img class="hero-video-card__poster" src="https://vumbnail.com/${id}.jpg" alt="" loading="eager" decoding="async">
-        <div class="hero-video-card__player">
-          <iframe class="hero-video-card__iframe" data-vimeo-src="${src}"
-            allow="autoplay; fullscreen; picture-in-picture" allowfullscreen title=""></iframe>
-        </div>
-        <button type="button" class="hero-video-card__expand" aria-label="Plein écran" data-expand-vimeo="${id}"></button>
-      </div>
-    </article>`;
+  track.innerHTML = `${set}<div class="marquee__set" aria-hidden="true">${items}</div>`;
 }
 
 function renderHeroVideos(ids) {
@@ -212,63 +180,22 @@ function renderHeroVideos(ids) {
   const bottomTrack = document.getElementById("hero-video-track-bottom");
   if (!topTrack || !bottomTrack || !ids.length) return;
 
-  const fillTrack = (track, videoIds, animClass) => {
-    const mobile = isMobileLayout();
-    const set = videoIds.map((id) => heroVideoCard(id)).join("");
-    const viewport = track.closest(".hero-videos__viewport");
+  const mobile = isMobileLayout();
+  const card = (id) =>
+    `<article class="hero-video-card" data-vimeo="${id}" role="button" tabindex="0" aria-label="Lire la vidéo">
+      <div class="hero-video-card__media">
+        <img src="https://vumbnail.com/${id}.jpg" alt="" loading="${mobile ? "eager" : "lazy"}" decoding="async">
+        <span class="hero-video-card__play" aria-hidden="true"></span>
+      </div>
+    </article>`;
 
-    if (mobile) {
-      track.className = "hero-videos__track";
-      track.innerHTML = `<div class="hero-videos__set">${set}</div>`;
-      viewport?.classList.add("js-touch-rail");
-    } else {
-      track.className = `hero-videos__track ${animClass}`;
-      track.innerHTML = `<div class="hero-videos__set">${set}</div><div class="hero-videos__set" aria-hidden="true">${set}</div>`;
-      viewport?.classList.remove("js-touch-rail");
-    }
+  const fillTrack = (track, videoIds) => {
+    const set = videoIds.map(card).join("");
+    track.innerHTML = `<div class="hero-videos__set">${set}</div><div class="hero-videos__set" aria-hidden="true">${set}</div>`;
   };
 
-  fillTrack(topTrack, ids.slice(0, HERO_VIDEOS_TOP), "hero-videos__track--fwd");
-  fillTrack(bottomTrack, ids.slice(HERO_VIDEOS_TOP, HERO_VIDEOS_TOP + HERO_VIDEOS_BOTTOM), "hero-videos__track--rev");
-}
-
-function loadHeroIframe(iframe) {
-  const src = iframe.dataset.vimeoSrc;
-  if (!src || iframe.src) return;
-  iframe.src = src;
-  iframe.addEventListener(
-    "load",
-    () => iframe.closest(".hero-video-card__media")?.classList.add("is-playing"),
-    { once: true }
-  );
-}
-
-function initHeroVimeoLazy() {
-  const rootMargin = isMobileLayout() ? "100px" : "200px";
-  const cap = isMobileLayout() ? 6 : 4;
-  let loaded = 0;
-
-  document.querySelectorAll(".hero-video-card__iframe[data-vimeo-src]").forEach((iframe) => {
-    if (loaded < cap) {
-      loadHeroIframe(iframe);
-      loaded += 1;
-    }
-  });
-
-  const io = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry) => {
-        if (!entry.isIntersecting) return;
-        loadHeroIframe(entry.target);
-        io.unobserve(entry.target);
-      });
-    },
-    { root: null, rootMargin, threshold: 0.08 }
-  );
-
-  document.querySelectorAll(".hero-video-card__iframe[data-vimeo-src]").forEach((iframe) => {
-    if (!iframe.src) io.observe(iframe);
-  });
+  fillTrack(topTrack, ids.slice(0, HERO_VIDEOS_TOP));
+  fillTrack(bottomTrack, ids.slice(HERO_VIDEOS_TOP, HERO_VIDEOS_TOP + HERO_VIDEOS_BOTTOM));
 }
 
 function initRowPause(container, rowSelector) {
@@ -283,12 +210,15 @@ function initHeroVideoCarousel() {
   const wrap = document.getElementById("hero-videos");
   if (!wrap) return;
 
-  if (!isMobileLayout()) initRowPause(wrap, ".hero-videos__row");
+  initRowPause(wrap, ".hero-videos__row");
 
-  wrap.querySelectorAll("[data-expand-vimeo]").forEach((btn) => {
-    btn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      openVideo(btn.dataset.expandVimeo);
+  wrap.querySelectorAll(".hero-video-card").forEach((card) => {
+    card.addEventListener("click", () => openVideo(card.dataset.vimeo));
+    card.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        openVideo(card.dataset.vimeo);
+      }
     });
   });
 }
@@ -306,7 +236,7 @@ function openVideo(id) {
     modal.querySelector(".video-modal__close").addEventListener("click", closeVideo);
   }
   modal.querySelector(".video-modal__frame").innerHTML =
-    `<iframe src="https://player.vimeo.com/video/${id}?autoplay=1&title=0&byline=0&portrait=0&controls=1&playsinline=1" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen title="Sphera Films"></iframe>`;
+    `<iframe src="https://player.vimeo.com/video/${id}?autoplay=1&title=0&byline=0&portrait=0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen title="Sphera Films"></iframe>`;
   modal.classList.add("is-open");
   document.body.style.overflow = "hidden";
   if (window.lenis) window.lenis.stop();
@@ -331,17 +261,9 @@ function showcaseCell(item, eager = false) {
 
 function renderShowcaseRow(rowItems, dir, duration, eagerRow = false) {
   if (!rowItems.length) return "";
-  const mobile = isMobileLayout();
-  const eager = eagerRow && mobile;
-  const cells = rowItems.map((item, i) => showcaseCell(item, eager || i < 4)).join("");
+  const eager = eagerRow && isMobileLayout();
+  const cells = rowItems.map((item, i) => showcaseCell(item, eager && i < 6)).join("");
   const set = `<div class="showcase-marquee__set">${cells}</div>`;
-
-  if (mobile) {
-    return `<div class="showcase-marquee__row">
-      <div class="showcase-marquee__viewport js-touch-rail">${set}</div>
-    </div>`;
-  }
-
   return `<div class="showcase-marquee__row">
     <div class="showcase-marquee__track showcase-marquee__track--${dir}" style="--duration:${duration}s">
       ${set}${set}
@@ -370,7 +292,7 @@ function renderShowcase(items) {
     img.addEventListener("error", () => img.closest(".showcase-marquee__cell")?.remove());
   });
 
-  if (!isMobileLayout()) initRowPause(root, ".showcase-marquee__row");
+  initRowPause(root, ".showcase-marquee__row");
   bindLightbox(root, "[data-lightbox]");
 }
 
@@ -492,10 +414,8 @@ function initNavToggle() {
 
 init().catch(async (err) => {
   console.error(err);
-  initHeroVimeoLazy();
   document.body.classList.add("site-ready");
   await finishPreloader();
-  initMobileRails();
   initScrollReveal();
   document.querySelectorAll("[data-aos], .reveal").forEach((el) => {
     el.style.opacity = "1";

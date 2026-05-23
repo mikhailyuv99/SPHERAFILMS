@@ -10,7 +10,15 @@ SRC_BLACK = ROOT / "assets" / "logo.svg"
 SRC_WHITE = ROOT / "assets" / "logo-white.svg"
 BG_DARK = "#04080e"
 BG_LIGHT = "#ffffff"
-WORDMARK = "Sphera Films"
+WORDMARK = "SPHERA FILMS"
+# Match site .hero__wordmark (Syne, uppercase, wide tracking)
+WORDMARK_STYLE = (
+    'font-family="Syne, Arial, sans-serif" font-size="{size}" font-weight="600" '
+    'letter-spacing="0.42em" text-transform="uppercase" text-anchor="middle"'
+)
+LOGO_SCALE_WORDMARK = 0.22
+LOGO_SCALE_OG = 0.32
+LOGO_SCALE_FAVICON_PAD = 0.08
 
 
 def load_logo_path() -> str:
@@ -25,27 +33,26 @@ def load_logo_path() -> str:
 
 def wordmark_svg(path_d: str, fill: str, bg: str | None, width: int = 800, height: int = 400) -> str:
     bg_rect = f'<rect width="100%" height="100%" fill="{bg}"/>' if bg else ""
-    text_fill = fill
+    text_size = int(width * 0.065)
     return f"""<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" viewBox="0 0 {width} {height}">
   {bg_rect}
-  <g transform="translate({width / 2} {height * 0.38}) scale(0.11) translate(-1000 -1000)">
-    <path fill="{text_fill}" d="{path_d}"/>
+  <g transform="translate({width / 2} {height * 0.42}) scale({LOGO_SCALE_WORDMARK}) translate(-1000 -1000)">
+    <path fill="{fill}" d="{path_d}"/>
   </g>
-  <text x="{width / 2}" y="{height * 0.78}" fill="{text_fill}" font-family="Syne, Arial, sans-serif"
-    font-size="48" font-weight="600" letter-spacing="0.12em" text-anchor="middle">{WORDMARK}</text>
+  <text x="{width / 2}" y="{height * 0.82}" fill="{fill}" {WORDMARK_STYLE.format(size=text_size)} text-indent="0.42em">{WORDMARK}</text>
 </svg>
 """
 
 
 def mark_only_svg(path_d: str, fill: str, bg: str | None, size: int = 512) -> str:
     bg_rect = f'<rect width="100%" height="100%" fill="{bg}"/>' if bg else ""
-    pad = size * 0.12
+    pad = size * LOGO_SCALE_FAVICON_PAD
     inner = size - pad * 2
     return f"""<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="{size}" height="{size}" viewBox="0 0 {size} {size}">
   {bg_rect}
-  <g transform="translate({pad} {pad}) scale({inner / 2000})">
+  <g transform="translate({size / 2} {size / 2}) scale({inner / 2000}) translate(-1000 -1000)">
     <path fill="{fill}" d="{path_d}"/>
   </g>
 </svg>
@@ -56,13 +63,10 @@ def og_svg(path_d: str) -> str:
     return f"""<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
   <rect width="1200" height="630" fill="{BG_DARK}"/>
-  <g transform="translate(600 250) scale(0.14) translate(-1000 -1000)">
+  <g transform="translate(600 255) scale({LOGO_SCALE_OG}) translate(-1000 -1000)">
     <path fill="#ffffff" d="{path_d}"/>
   </g>
-  <text x="600" y="420" fill="#ffffff" font-family="Syne, Arial, sans-serif"
-    font-size="56" font-weight="600" letter-spacing="0.14em" text-anchor="middle">SPHERA FILMS</text>
-  <text x="600" y="480" fill="#8eb8e8" font-family="Syne, Arial, sans-serif"
-    font-size="22" font-weight="500" letter-spacing="0.28em" text-anchor="middle">AGENCE AUDIOVISUELLE · CANNES</text>
+  <text x="600" y="500" fill="#e8eef5" {WORDMARK_STYLE.format(size=52)} text-indent="0.42em">{WORDMARK}</text>
 </svg>
 """
 
@@ -109,9 +113,8 @@ def main() -> None:
 
     from PIL import Image
 
-    ico_sizes = [(16, 16), (32, 32), (48, 48)]
     imgs = [Image.open(BRAND / "favicon-16x16.png"), Image.open(BRAND / "favicon-32x32.png")]
-    imgs[0].save(BRAND / "favicon.ico", format="ICO", sizes=ico_sizes)
+    imgs[0].save(BRAND / "favicon.ico", format="ICO", sizes=[(16, 16), (32, 32), (48, 48)])
 
     root_copies = [
         (BRAND / "favicon.ico", ROOT / "favicon.ico"),
@@ -127,31 +130,9 @@ def main() -> None:
 
     readme = """# Sphera Films — brand assets
 
-## Logo mark (no wordmark)
-| File | Use |
-|------|-----|
-| `logo-mark-black.svg` | Dark logo on transparent |
-| `logo-mark-white.svg` | Light logo on transparent |
-| `logo-mark-black-on-white.svg` | Dark logo on white background |
-| `logo-mark-white-on-black.svg` | Light logo on dark background |
+Wordmark on generated files: **SPHERA FILMS** (Syne, uppercase, site tracking).
 
-## Logo + wordmark
-| File | Use |
-|------|-----|
-| `logo-wordmark-black-on-white.svg` | Print / light backgrounds |
-| `logo-wordmark-white-on-black.svg` | Web / dark backgrounds |
-
-## Web & social
-| File | Size | Use |
-|------|------|-----|
-| `favicon.svg` / `favicon.ico` | — | Browser tab |
-| `favicon-16x16.png` | 16×16 | Favicon |
-| `favicon-32x32.png` | 32×32 | Favicon |
-| `apple-touch-icon.png` | 180×180 | iOS home screen |
-| `social/og-image.png` | 1200×630 | Open Graph (Facebook, WhatsApp, LinkedIn, iMessage) |
-| `social/instagram-profile.png` | 320×320 | Instagram profile picture |
-
-Site URL for meta tags: https://spherafilms.com
+See files in this folder and `social/` for OG (1200×630), favicon, apple-touch-icon, Instagram profile.
 """
     write_text(BRAND / "README.md", readme)
     print("Brand assets written to", BRAND)

@@ -103,21 +103,14 @@ button {
   margin-inline: auto;
 }
 
-/* Background — metallic sphere (blurred); stable in in-app browsers */
+/* Background — metallic sphere (blurred) */
 .bg-texture {
   position: fixed;
-  inset: 0;
+  inset: -4%;
   z-index: -2;
-  width: 100%;
-  height: 100%;
-  min-height: 100vh;
-  min-height: 100dvh;
   background: url("../assets/bg-texture.png") center / cover no-repeat;
-  background-attachment: scroll;
   filter: blur(14px) saturate(1.15) contrast(1.08);
-  transform: translateZ(0);
-  -webkit-backface-visibility: hidden;
-  backface-visibility: hidden;
+  transform: scale(1.08);
   pointer-events: none;
 }
 
@@ -568,72 +561,10 @@ html.is-inapp body {
   overflow: hidden;
 }
 
-.hero-video-card__poster {
-  position: absolute;
-  inset: 0;
+.hero-video-card__media img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  z-index: 1;
-  transition: opacity 0.4s;
-}
-
-.hero-video-card__media.is-playing .hero-video-card__poster {
-  opacity: 0;
-  pointer-events: none;
-}
-
-.hero-video-card__player {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-}
-
-.hero-video-card__player iframe {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 100%;
-  height: 100%;
-  min-width: 100%;
-  min-height: 100%;
-  border: 0;
-  transform: translate(-50%, -50%) scale(1.2);
-  pointer-events: none;
-}
-
-.hero-video-card__expand {
-  position: absolute;
-  right: 0.5rem;
-  bottom: 0.5rem;
-  z-index: 4;
-  width: 2.35rem;
-  height: 2.35rem;
-  padding: 0;
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  background: rgba(4, 8, 14, 0.72);
-  cursor: pointer;
-  pointer-events: auto;
-  transition: border-color 0.25s, background 0.25s;
-}
-
-.hero-video-card__expand::before {
-  content: "";
-  display: block;
-  width: 0.85rem;
-  height: 0.85rem;
-  margin: 0.55rem auto 0;
-  border: 2px solid #fff;
-  box-shadow: 3px 3px 0 -1px #04080e, 3px 3px 0 0 #fff;
-}
-
-.hero-video-card__expand:hover {
-  border-color: rgba(142, 200, 255, 0.65);
-  background: rgba(4, 8, 14, 0.9);
-}
-
-.hero-video-card__media:has(.hero-video-card__player) .hero-video-card__play {
-  display: none;
 }
 
 @keyframes heroVideoMarqueeFwd {
@@ -881,12 +812,6 @@ html.is-loading body {
   overflow: hidden;
 }
 
-html.is-loading .site-header,
-html.is-loading main,
-html.is-loading .site-footer {
-  visibility: hidden;
-}
-
 .site-preloader {
   position: fixed;
   inset: 0;
@@ -923,12 +848,14 @@ html.is-loading .site-footer {
 
 .site-preloader__wordmark {
   margin: 0;
-  font-family: var(--font);
-  font-size: clamp(1.05rem, 4.2vw, 1.35rem);
+  font-family: var(--font-display);
+  font-size: clamp(0.95rem, 2.6vw, 1.25rem);
   font-weight: 600;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.42em;
   text-transform: uppercase;
-  color: var(--text);
+  text-indent: 0.42em;
+  line-height: 1;
+  color: var(--silver);
 }
 
 .site-preloader__bar {
@@ -953,16 +880,6 @@ html.is-loading .site-footer {
   to {
     transform: scaleX(1);
   }
-}
-
-/* Page reveal — fade in after preloader */
-html:not(.is-revealed) body {
-  opacity: 0;
-}
-
-html.is-revealed body {
-  opacity: 1;
-  transition: opacity var(--page-reveal-duration) var(--ease-reveal);
 }
 
 /* Showcase — auto-scrolling photo rows */
@@ -1900,11 +1817,6 @@ body.lightbox-open {
 
 /* Mobile */
 @media (max-width: 900px) {
-  /* No scroll-reveal — Lenis scroll only; page fade still after preloader */
-  html.is-revealed body {
-    transition: opacity 0.85s var(--ease-reveal);
-  }
-
   .reveal,
   [data-reveal],
   [data-aos],
@@ -1981,76 +1893,19 @@ body.lightbox-open {
     text-align: center;
   }
 
-  /* Touch swipe rails — videos, brand logos, showcase (mobile only) */
-  html.is-mobile-rail .hero-videos,
-  html.is-mobile-rail .marquee,
-  html.is-mobile-rail .showcase__mosaic-wrap {
-    mask-image: none;
+  /* Auto-scrolling marquees on mobile */
+  .hero-videos__track--fwd,
+  .hero-videos__track--rev,
+  .marquee__track,
+  .showcase-marquee__track--left,
+  .showcase-marquee__track--right {
+    animation-play-state: running !important;
   }
 
-  html.is-mobile-rail .hero-videos__row {
-    overflow: visible;
-  }
-
-  html.is-mobile-rail .hero-videos__viewport.js-touch-rail,
-  html.is-mobile-rail .marquee.js-touch-rail,
-  html.is-mobile-rail .showcase-marquee__viewport.js-touch-rail {
-    overflow-x: auto;
-    overflow-y: hidden;
-    -webkit-overflow-scrolling: touch;
-    scroll-snap-type: x mandatory;
-    overscroll-behavior-x: contain;
-    touch-action: pan-x;
-    scrollbar-width: none;
-  }
-
-  html.is-mobile-rail .hero-videos__viewport.js-touch-rail::-webkit-scrollbar,
-  html.is-mobile-rail .marquee.js-touch-rail::-webkit-scrollbar,
-  html.is-mobile-rail .showcase-marquee__viewport.js-touch-rail::-webkit-scrollbar {
-    display: none;
-  }
-
-  html.is-mobile-rail .hero-videos__track,
-  html.is-mobile-rail .marquee__track {
-    animation: none !important;
-    transform: none !important;
-    width: max-content;
-    pointer-events: auto;
-  }
-
-  html.is-mobile-rail .hero-videos__set,
-  html.is-mobile-rail .marquee__set,
-  html.is-mobile-rail .showcase-marquee__set {
-    display: flex;
-    align-items: stretch;
-    width: max-content;
-  }
-
-  html.is-mobile-rail .hero-video-card {
-    flex: 0 0 min(84vw, 360px);
-    scroll-snap-align: start;
-  }
-
-  html.is-mobile-rail .marquee__logo {
-    scroll-snap-align: center;
-    flex-shrink: 0;
-  }
-
-  html.is-mobile-rail .showcase-marquee__cell {
-    flex: 0 0 min(72vw, 280px);
-    scroll-snap-align: start;
-    min-height: 220px;
-    aspect-ratio: 4 / 5;
-  }
-
-  html.is-mobile-rail .showcase-marquee__row {
-    overflow: visible;
-    margin-bottom: 0.5rem;
-  }
-
-  html.is-mobile-rail .marquee__set {
-    gap: clamp(2rem, 8vw, 3.5rem);
-    padding-inline: 1.25rem;
+  .marquee__logo,
+  .hero-video-card__media img {
+    opacity: 1 !important;
+    visibility: visible !important;
   }
 
   .faq__q {

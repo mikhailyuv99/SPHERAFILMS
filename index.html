@@ -5,7 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Sphera Films | Agence Audiovisuelle</title>
   <meta name="description" content="Sphera Films, agence de production audiovisuelle basée à Cannes. Créateurs d'images d'exception sur la French Riviera.">
-  <script>document.documentElement.classList.add("is-loading");</script>
+  <script>window.__SF_PAGE_START=Date.now();document.documentElement.classList.add("is-loading");</script>
+  <style>
+    .site-preloader{position:fixed;inset:0;z-index:2147483647;display:flex;align-items:center;justify-content:center;background:#04080e}
+    html.is-loading{overflow:hidden}
+    html.is-loading body{overflow:hidden}
+  </style>
   <script src="js/inapp-browser.js"></script>
   <link rel="icon" href="favicon.ico" sizes="any">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
@@ -37,7 +42,7 @@
   <div id="site-preloader" class="site-preloader" aria-live="polite" aria-busy="true">
     <div class="site-preloader__inner">
       <img class="site-preloader__logo" src="assets/brand/logo-mark-white.svg" alt="" width="108" height="113">
-      <p class="site-preloader__wordmark">Sphera Films</p>
+      <p class="site-preloader__wordmark">SPHERA FILMS</p>
       <div class="site-preloader__bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
         <span class="site-preloader__fill"></span>
       </div>
