@@ -114,14 +114,39 @@ button {
   pointer-events: none;
 }
 
-html.is-inapp .bg-texture {
-  inset: 0;
-  transform: none;
+html.is-inapp {
+  background-color: var(--bg);
+  background-image:
+    linear-gradient(125deg, rgba(4, 8, 18, 0.78) 0%, rgba(4, 10, 22, 0.55) 50%, rgba(4, 8, 18, 0.8) 100%),
+    radial-gradient(ellipse 55% 45% at 72% 38%, rgba(110, 190, 255, 0.14), transparent 60%),
+    url("../assets/bg-texture.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  min-height: 100%;
 }
 
-html.is-inapp,
 html.is-inapp body {
+  background: transparent;
+}
+
+html.is-inapp .bg-texture {
+  display: none;
+}
+
+html.is-inapp .site-preloader {
   background-color: var(--bg);
+  background-image:
+    linear-gradient(125deg, rgba(4, 8, 18, 0.78) 0%, rgba(4, 10, 22, 0.55) 50%, rgba(4, 8, 18, 0.8) 100%),
+    radial-gradient(ellipse 55% 45% at 72% 38%, rgba(110, 190, 255, 0.14), transparent 60%),
+    url("../assets/bg-texture.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+html.is-inapp .site-preloader__bg {
+  display: none;
 }
 
 .bg-texture::after {

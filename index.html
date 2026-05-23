@@ -6,6 +6,7 @@
   <title>Sphera Films | Agence Audiovisuelle</title>
   <meta name="description" content="Sphera Films, agence de production audiovisuelle basée à Cannes. Créateurs d'images d'exception sur la French Riviera.">
   <script>window.__SF_PAGE_START=Date.now();document.documentElement.classList.add("is-loading");</script>
+  <script src="js/inapp-browser.js"></script>
   <style>
     html.is-loading{overflow:hidden}
     html.is-loading body{overflow:hidden}
@@ -13,11 +14,12 @@
     .site-preloader{position:fixed;inset:0;z-index:2147483647;display:flex;align-items:center;justify-content:center}
     .site-preloader__bg{position:fixed;inset:-4%;z-index:-1;background:url("assets/bg-texture.png") center/cover no-repeat;filter:blur(14px) saturate(1.15) contrast(1.08);transform:scale(1.08)}
     .site-preloader__bg::after{content:"";position:absolute;inset:0;background:linear-gradient(125deg,rgba(4,8,18,.78) 0%,rgba(4,10,22,.55) 50%,rgba(4,8,18,.8) 100%),radial-gradient(ellipse 55% 45% at 72% 38%,rgba(110,190,255,.14),transparent 60%)}
+    html.is-inapp .site-preloader{background-color:#080708;background-image:linear-gradient(125deg,rgba(4,8,18,.78) 0%,rgba(4,10,22,.55) 50%,rgba(4,8,18,.8) 100%),radial-gradient(ellipse 55% 45% at 72% 38%,rgba(110,190,255,.14),transparent 60%),url("assets/bg-texture.png");background-size:cover;background-position:center;background-repeat:no-repeat}
+    html.is-inapp .site-preloader__bg{display:none!important}
   </style>
   <link rel="preconnect" href="https://player.vimeo.com" crossorigin>
   <link rel="preconnect" href="https://f.vimeocdn.com" crossorigin>
   <link rel="dns-prefetch" href="https://i.vimeocdn.com">
-  <script src="js/inapp-browser.js"></script>
   <link rel="icon" href="favicon.ico" sizes="any">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="icon" href="favicon-32x32.png" type="image/png" sizes="32x32">
