@@ -407,9 +407,29 @@ function initHeroVideoHoverPlay() {
   const wrap = document.getElementById("hero-videos");
   if (!wrap || isMobileLayout()) return;
 
+  let activeHoverCard = null;
+  let hoverLoadTimer = 0;
+
   wrap.querySelectorAll(".hero-video-card").forEach((card) => {
-    card.addEventListener("mouseenter", () => playHeroVideoOnHover(card));
-    card.addEventListener("mouseleave", () => unloadHeroVideo(card));
+    card.addEventListener("mouseenter", () => {
+      card.closest(".hero-videos__row")?.classList.add("is-paused");
+      window.clearTimeout(hoverLoadTimer);
+      if (activeHoverCard && activeHoverCard !== card) {
+        unloadHeroVideo(activeHoverCard);
+      }
+      hoverLoadTimer = window.setTimeout(() => {
+        activeHoverCard = card;
+        playHeroVideoOnHover(card);
+      }, 240);
+    });
+    card.addEventListener("mouseleave", () => {
+      window.clearTimeout(hoverLoadTimer);
+      card.closest(".hero-videos__row")?.classList.remove("is-paused");
+      if (activeHoverCard === card) {
+        unloadHeroVideo(card);
+        activeHoverCard = null;
+      }
+    });
   });
 }
 
@@ -426,7 +446,6 @@ function initHeroVideoCarousel() {
   if (!wrap) return;
 
   if (!isMobileLayout()) {
-    initRowPause(wrap, ".hero-videos__row");
     initHeroVideoHoverPlay();
     return;
   }

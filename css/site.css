@@ -475,7 +475,6 @@ html.is-inapp body {
   padding-bottom: 0.5rem;
   overflow: hidden;
   mask-image: linear-gradient(90deg, transparent, #000 3%, #000 97%, transparent);
-  contain: layout style;
 }
 
 .hero-videos__row {
@@ -500,6 +499,11 @@ html.is-inapp body {
   gap: var(--hero-video-gap, 12px);
   will-change: transform;
   pointer-events: none;
+  backface-visibility: hidden;
+}
+
+.hero-videos__row.is-paused .hero-videos__track {
+  will-change: auto;
 }
 
 .hero-videos__track--fwd {
@@ -524,8 +528,13 @@ html.is-inapp body {
 
 .hero-video-card:hover {
   border-color: rgba(142, 200, 255, 0.45);
+}
+
+.hero-video-card__media {
   position: relative;
-  z-index: 2;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  contain: paint;
 }
 
 .hero-video-card__play {
@@ -554,12 +563,6 @@ html.is-inapp body {
 
 .hero-video-card:hover .hero-video-card__play {
   opacity: 1;
-}
-
-.hero-video-card__media {
-  position: relative;
-  aspect-ratio: 16 / 9;
-  overflow: hidden;
 }
 
 .hero-video-card__media img,
