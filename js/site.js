@@ -161,7 +161,6 @@ async function init() {
       const img = card.querySelector("img");
       if (url && img && img.src !== url) img.src = url;
     });
-    if (mobile) initMobileHeroMarquees({ reset: false });
     else syncHeroMarqueeLoops();
   }
   const vimeoThumbUrls = mobile ? vimeoIds.map((id) => thumbMap[id]).filter(Boolean) : [];
@@ -185,10 +184,14 @@ async function init() {
   await Promise.all([minWait, preloadWait]);
   if (mobile) {
     await waitForDomImages([".marquee", ".hero-videos"], { timeout: 22000 });
-    initMobileHeroMarquees({ reset: false });
   }
   document.body.classList.add("site-ready");
   await finishPreloader();
+  if (mobile) {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => initMobileHeroMarquees({ reset: true }));
+    });
+  }
   if (!mobile) window.setTimeout(() => initScrollReveal(), 250);
 }
 
@@ -302,7 +305,7 @@ function startMobileHeroMarquee(track, direction) {
   mobileHeroMarquees.push(state);
 }
 
-function initMobileHeroMarquees({ reset = false } = {}) {
+function initMobileHeroMarquees({ reset = false, attempt = 0 } = {}) {
   if (!isMobileLayout()) return;
 
   if (mobileHeroMarquees.length > 0 && !reset) {
@@ -318,18 +321,18 @@ function initMobileHeroMarquees({ reset = false } = {}) {
   const top = document.getElementById("hero-video-track-top");
   const bottom = document.getElementById("hero-video-track-bottom");
 
-  requestAnimationFrame(() => {
-    requestAnimationFrame(() => {
-      if (top) {
-        top.style.animation = "none";
-        startMobileHeroMarquee(top, -1);
-      }
-      if (bottom) {
-        bottom.style.animation = "none";
-        startMobileHeroMarquee(bottom, 1);
-      }
-    });
-  });
+  if (top) {
+    top.style.animation = "none";
+    startMobileHeroMarquee(top, -1);
+  }
+  if (bottom) {
+    bottom.style.animation = "none";
+    startMobileHeroMarquee(bottom, 1);
+  }
+
+  if (mobileHeroMarquees.length === 0 && attempt < 15) {
+    window.setTimeout(() => initMobileHeroMarquees({ reset: true, attempt: attempt + 1 }), 150);
+  }
 }
 
 function syncHeroMarqueeLoops(root = document) {
@@ -453,8 +456,6 @@ function initHeroVideoCarousel() {
       }
     });
   });
-
-  initMobileHeroMarquees({ reset: true });
 }
 
 function openVideo(id) {

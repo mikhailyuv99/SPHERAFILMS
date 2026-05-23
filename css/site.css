@@ -481,6 +481,7 @@ html.is-inapp body {
 .hero-videos__row {
   overflow: hidden;
   pointer-events: auto;
+  padding-bottom: 6px;
 }
 
 .hero-videos__row.is-paused .hero-videos__track {
@@ -490,6 +491,7 @@ html.is-inapp body {
 .hero-videos__viewport {
   overflow: hidden;
   pointer-events: auto;
+  padding: 3px 0 5px;
 }
 
 .hero-videos__track {
@@ -523,6 +525,8 @@ html.is-inapp body {
 .hero-video-card:hover {
   border-color: rgba(142, 200, 255, 0.45);
   box-shadow: 0 0 32px rgba(110, 190, 255, 0.18);
+  position: relative;
+  z-index: 2;
 }
 
 .hero-video-card__play {
