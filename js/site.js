@@ -186,11 +186,9 @@ async function init() {
   }
   document.body.classList.add("site-ready");
   await finishPreloader();
-  if (mobile) {
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => initMobileHeroMarquees({ reset: true }));
-    });
-  }
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => initHeroMarquees({ reset: true }));
+  });
   if (!mobile) window.setTimeout(() => initScrollReveal(), 250);
 }
 
@@ -262,7 +260,8 @@ function syncHeroMarqueeLoop(track) {
   else track.style.removeProperty("--loop-w");
 }
 
-let mobileHeroMarquees = [];
+let heroMarquees = [];
+let heroMarqueeRaf = 0;
 
 function measureHeroLoop(track) {
   const cards = track.querySelectorAll(".hero-video-card");
@@ -271,24 +270,39 @@ function measureHeroLoop(track) {
   return Math.round(cards[half].offsetLeft - cards[0].offsetLeft);
 }
 
-function stopMobileHeroMarquees() {
-  mobileHeroMarquees.forEach((state) => {
-    state.active = false;
-    if (state.raf) cancelAnimationFrame(state.raf);
-  });
-  mobileHeroMarquees = [];
+function findHeroMarquee(track) {
+  return heroMarquees.find((state) => state.track === track);
 }
 
-function startMobileHeroMarquee(track, direction) {
-  const speed = direction < 0 ? 0.65 : 0.6;
-  const loopW = measureHeroLoop(track);
-  if (loopW <= 0) return;
+function pauseHeroMarquee(track) {
+  const state = findHeroMarquee(track);
+  if (state) state.paused = true;
+}
 
-  let offset = direction < 0 ? 0 : -loopW;
-  const state = { track, active: true, raf: 0, direction, speed, loopW, offset };
+function resumeHeroMarquee(track) {
+  const state = findHeroMarquee(track);
+  if (state) state.paused = false;
+}
 
-  const tick = () => {
-    if (!state.active) return;
+function stopHeroMarquees() {
+  heroMarquees.forEach((state) => {
+    state.active = false;
+  });
+  if (heroMarqueeRaf) {
+    cancelAnimationFrame(heroMarqueeRaf);
+    heroMarqueeRaf = 0;
+  }
+  heroMarquees = [];
+}
+
+function driveHeroMarquees() {
+  if (!heroMarquees.some((state) => state.active)) {
+    heroMarqueeRaf = 0;
+    return;
+  }
+  heroMarqueeRaf = requestAnimationFrame(driveHeroMarquees);
+  for (const state of heroMarquees) {
+    if (!state.active || state.paused) continue;
     if (state.direction < 0) {
       state.offset -= state.speed;
       if (state.offset <= -state.loopW) state.offset += state.loopW;
@@ -296,49 +310,72 @@ function startMobileHeroMarquee(track, direction) {
       state.offset += state.speed;
       if (state.offset >= 0) state.offset -= state.loopW;
     }
-    state.track.style.transform = `translate3d(${state.offset}px, 0, 0)`;
-    state.raf = requestAnimationFrame(tick);
-  };
-
-  state.raf = requestAnimationFrame(tick);
-  mobileHeroMarquees.push(state);
+    state.mover.style.transform = `translate3d(${state.offset}px, 0, 0)`;
+  }
 }
 
-function initMobileHeroMarquees({ reset = false, attempt = 0 } = {}) {
-  if (!isMobileLayout()) return;
+function ensureHeroMover(track) {
+  const existing = track.closest(".hero-videos__mover");
+  if (existing) return existing;
 
-  if (mobileHeroMarquees.length > 0 && !reset) {
-    mobileHeroMarquees.forEach((state) => {
+  const el = "div";
+  const mover = document.createElement(el);
+  mover.className = "hero-videos__mover";
+  track.parentElement?.insertBefore(mover, track);
+  mover.appendChild(track);
+  return mover;
+}
+
+function startHeroMarquee(track, direction, durationSec) {
+  const loopW = measureHeroLoop(track);
+  if (loopW <= 0) return;
+
+  const mover = ensureHeroMover(track);
+  const speed = durationSec ? loopW / (durationSec * 60) : direction < 0 ? 0.65 : 0.6;
+  const offset = direction < 0 ? 0 : -loopW;
+  const state = {
+    track,
+    mover,
+    active: true,
+    direction,
+    speed,
+    loopW,
+    offset,
+    paused: false,
+    durationSec: durationSec || null,
+  };
+
+  track.style.animation = "none";
+  track.style.transform = "";
+  mover.style.transform = `translate3d(${offset}px, 0, 0)`;
+  heroMarquees.push(state);
+
+  if (!heroMarqueeRaf) driveHeroMarquees();
+}
+
+function initHeroMarquees({ reset = false, attempt = 0 } = {}) {
+  if (heroMarquees.length > 0 && !reset) {
+    heroMarquees.forEach((state) => {
       const w = measureHeroLoop(state.track);
-      if (w > 0) state.loopW = w;
+      if (w > 0) {
+        state.loopW = w;
+        state.speed = state.durationSec ? w / (state.durationSec * 60) : state.speed;
+      }
     });
     return;
   }
 
-  stopMobileHeroMarquees();
+  stopHeroMarquees();
 
   const top = document.getElementById("hero-video-track-top");
   const bottom = document.getElementById("hero-video-track-bottom");
 
-  if (top) {
-    top.style.animation = "none";
-    startMobileHeroMarquee(top, -1);
-  }
-  if (bottom) {
-    bottom.style.animation = "none";
-    startMobileHeroMarquee(bottom, 1);
-  }
+  if (top) startHeroMarquee(top, -1, isMobileLayout() ? null : 48);
+  if (bottom) startHeroMarquee(bottom, 1, isMobileLayout() ? null : 44);
 
-  if (mobileHeroMarquees.length === 0 && attempt < 15) {
-    window.setTimeout(() => initMobileHeroMarquees({ reset: true, attempt: attempt + 1 }), 150);
+  if (heroMarquees.length === 0 && attempt < 15) {
+    window.setTimeout(() => initHeroMarquees({ reset: true, attempt: attempt + 1 }), 150);
   }
-}
-
-function syncHeroMarqueeLoops(root = document) {
-  if (isMobileLayout()) return;
-  root.querySelectorAll(".hero-videos__track").forEach((track) => {
-    syncHeroMarqueeLoop(track);
-  });
 }
 
 function renderHeroVideos(ids, thumbMap = {}) {
@@ -360,46 +397,59 @@ function renderHeroVideos(ids, thumbMap = {}) {
 
   fillTrack(topTrack, ids.slice(0, HERO_VIDEOS_TOP));
   fillTrack(bottomTrack, ids.slice(HERO_VIDEOS_TOP, HERO_VIDEOS_TOP + HERO_VIDEOS_BOTTOM));
+}
 
-  requestAnimationFrame(() => {
-    if (!isMobileLayout()) {
-      syncHeroMarqueeLoops();
-      requestAnimationFrame(() => syncHeroMarqueeLoops());
-    }
-  });
+let heroHoverPlayer = null;
+let heroHoverIframe = null;
+let heroHoverCard = null;
+
+function ensureHeroHoverPlayer() {
+  if (heroHoverPlayer) return { shell: heroHoverPlayer, iframe: heroHoverIframe };
+
+  const shellTag = "div";
+  heroHoverPlayer = document.createElement(shellTag);
+  heroHoverPlayer.className = "hero-video-hover-player";
+  heroHoverPlayer.hidden = true;
+  heroHoverIframe = document.createElement("iframe");
+  heroHoverIframe.className = "hero-video-hover-player__iframe";
+  heroHoverIframe.allow = "autoplay; fullscreen; picture-in-picture";
+  heroHoverIframe.allowFullscreen = true;
+  heroHoverIframe.title = "";
+  heroHoverPlayer.appendChild(heroHoverIframe);
+  document.body.appendChild(heroHoverPlayer);
+  return { shell: heroHoverPlayer, iframe: heroHoverIframe };
+}
+
+function positionHeroHoverPlayer(card) {
+  const { shell } = ensureHeroHoverPlayer();
+  const rect = card.getBoundingClientRect();
+  shell.style.width = `${rect.width}px`;
+  shell.style.height = `${rect.height}px`;
+  shell.style.transform = `translate3d(${rect.left}px, ${rect.top}px, 0)`;
 }
 
 function unloadHeroVideo(card) {
-  const player = card.querySelector(".hero-video-card__player");
-  if (!player) return;
-  player.innerHTML = "";
+  if (heroHoverCard !== card) return;
+  const { shell, iframe } = ensureHeroHoverPlayer();
+  iframe.removeAttribute("src");
+  shell.hidden = true;
+  heroHoverCard = null;
   card.querySelector(".hero-video-card__media")?.classList.remove("is-playing");
 }
 
 function playHeroVideoOnHover(card) {
   const id = card.dataset.vimeo;
   if (!id) return;
-  const player = card.querySelector(".hero-video-card__player");
-  if (!player) return;
 
-  let iframe = player.querySelector("iframe");
-  if (!iframe) {
-    iframe = document.createElement("iframe");
-    iframe.className = "hero-video-card__iframe";
-    iframe.allow = "autoplay; fullscreen; picture-in-picture";
-    iframe.allowFullscreen = true;
-    iframe.title = "";
-    player.appendChild(iframe);
-  }
+  const { shell, iframe } = ensureHeroHoverPlayer();
+  heroHoverCard = card;
+  positionHeroHoverPlayer(card);
+  shell.hidden = false;
+  card.querySelector(".hero-video-card__media")?.classList.add("is-playing");
 
   const src = vimeoInlineSrc(id);
-  if (iframe.src !== src) {
+  if (iframe.getAttribute("src") !== src) {
     iframe.src = src;
-    iframe.addEventListener(
-      "load",
-      () => card.querySelector(".hero-video-card__media")?.classList.add("is-playing"),
-      { once: true }
-    );
   }
 }
 
@@ -412,7 +462,7 @@ function initHeroVideoHoverPlay() {
 
   wrap.querySelectorAll(".hero-video-card").forEach((card) => {
     card.addEventListener("mouseenter", () => {
-      card.closest(".hero-videos__row")?.classList.add("is-paused");
+      pauseHeroMarquee(card.closest(".hero-videos__track"));
       window.clearTimeout(hoverLoadTimer);
       if (activeHoverCard && activeHoverCard !== card) {
         unloadHeroVideo(activeHoverCard);
@@ -424,7 +474,7 @@ function initHeroVideoHoverPlay() {
     });
     card.addEventListener("mouseleave", () => {
       window.clearTimeout(hoverLoadTimer);
-      card.closest(".hero-videos__row")?.classList.remove("is-paused");
+      resumeHeroMarquee(card.closest(".hero-videos__track"));
       if (activeHoverCard === card) {
         unloadHeroVideo(card);
         activeHoverCard = null;
@@ -447,7 +497,16 @@ function initHeroVideoCarousel() {
 
   if (!isMobileLayout()) {
     initHeroVideoHoverPlay();
-    return;
+  } else {
+    wrap.querySelectorAll(".hero-video-card").forEach((card) => {
+      card.addEventListener("click", () => openVideo(card.dataset.vimeo));
+      card.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          openVideo(card.dataset.vimeo);
+        }
+      });
+    });
   }
 
   let resizeTimer;
@@ -459,21 +518,11 @@ function initHeroVideoCarousel() {
       resizeTimer = window.setTimeout(() => {
         if (window.innerWidth === marqueeViewportW) return;
         marqueeViewportW = window.innerWidth;
-        initMobileHeroMarquees({ reset: true });
+        initHeroMarquees({ reset: true });
       }, 150);
     },
     { passive: true }
   );
-
-  wrap.querySelectorAll(".hero-video-card").forEach((card) => {
-    card.addEventListener("click", () => openVideo(card.dataset.vimeo));
-    card.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        openVideo(card.dataset.vimeo);
-      }
-    });
-  });
 }
 
 function openVideo(id) {
