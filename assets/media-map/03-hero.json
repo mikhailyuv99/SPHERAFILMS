@@ -1,0 +1,10 @@
+{
+  "description": "Hero — autoplay background video + poster JPG",
+  "page": "index",
+  "video": "assets/video/2fd03eee1d475c88c16ce9971695f4fd.mp4",
+  "poster": "assets/media/0bee10adc0a548861f7ce9fa2aa929e1.jpg",
+  "downloaded": {
+    "video": true,
+    "poster": true
+  }
+}

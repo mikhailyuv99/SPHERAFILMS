@@ -1,0 +1,16 @@
+{
+  "description": "Contact section — Instagram/LinkedIn/etc. icon PNGs (NOT client brands)",
+  "page": "index",
+  "order": [
+    "assets/media/88c84b8adc504d0c6bc888ad132eb388.png",
+    "assets/media/4c51dd0398a1625f638af77912acc3e1.png",
+    "assets/media/9184fd18c8c2435d46d9dfd396824526.png",
+    "assets/media/65b841d9c6b2b61ae45be9881ae7db97.png",
+    "assets/media/9771207b0afeccc0e4f4cde7bd363366.png",
+    "assets/media/536556aee892b7ba1f17321aa683cf2f.png",
+    "assets/media/e326174da2306cfbaa00b7bcde2a04ee.png"
+  ],
+  "missingOnDisk": [],
+  "countOnDisk": 7,
+  "countListed": 7
+}

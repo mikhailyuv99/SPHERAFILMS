@@ -1,0 +1,8 @@
+.DS_Store
+Thumbs.db
+.cursor/
+*.log
+__pycache__/
+*.pyc
+.env
+.env.*

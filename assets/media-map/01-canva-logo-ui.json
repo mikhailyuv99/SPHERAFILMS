@@ -1,0 +1,11 @@
+{
+  "description": "Old Canva logo placeholders in export — ignore, use 00-user-assets",
+  "page": "index",
+  "order": [
+    "assets/media/fec4c46f59d2687154e3f364f3b1cff0.svg",
+    "assets/media/fea1775c265beea9b248f4fa76d938d0.svg"
+  ],
+  "missingOnDisk": [],
+  "countOnDisk": 2,
+  "countListed": 2
+}

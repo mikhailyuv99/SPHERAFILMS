@@ -1,0 +1,13 @@
+{
+  "description": "Thumbnail JPGs stored under assets/video/",
+  "page": "index",
+  "order": [
+    "assets/video/10c61cc9c71023408f0d960488bc5634.jpg",
+    "assets/video/2a1667d743451ca80c66d858d5e673f9.jpg",
+    "assets/video/ca122f46decd8a1066fc86a23a9fdd4e.jpg",
+    "assets/video/c7ff2b0c83befffca63a5b114ae662ce.jpg"
+  ],
+  "missingOnDisk": [],
+  "countOnDisk": 4,
+  "countListed": 4
+}

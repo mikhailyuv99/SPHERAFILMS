@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Galerie | Sphera Films</title>
+  <meta name="description" content="Galerie photo Sphera Films, production audiovisuelle haut de gamme, Cannes.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="css/site.css" rel="stylesheet">
+</head>
+<body class="page-gallery">
+  <div class="bg-texture" aria-hidden="true"></div>
+
+  <header class="site-header site-header--centered" id="top">
+    <nav class="site-nav" aria-label="Navigation principale">
+      <div class="site-nav__brand">
+        <img class="site-nav__logo logo--silver" src="assets/logo-white.svg" alt="" width="88" height="93">
+        <p class="site-nav__wordmark">Sphera Films</p>
+      </div>
+      <div class="site-nav__links">
+        <a href="index.html#hero">ACCUEIL</a>
+        <a href="gallerie.html" class="is-active">GALERIE</a>
+        <a href="index.html#founders">FONDATEURS</a>
+        <a href="index.html#contact" class="nav-cta">CONTACT</a>
+      </div>
+    </nav>
+    <button class="nav-toggle" type="button" aria-label="Menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </header>
+
+  <main class="gallery-page">
+    <div class="gallery-grid" id="gallery-grid"></div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container site-footer__inner">
+      <a class="brand brand--footer" href="index.html#top">
+        <img class="brand__mark logo--silver" src="assets/logo-white.svg" alt="">
+        <span class="brand__name">SPHERA FILMS</span>
+      </a>
+      <nav class="footer-nav">
+        <a href="mentions-legales.html">MENTIONS LÉGALES</a>
+        <a href="politique-de-confidentialite.html">POLITIQUE DE CONFIDENTIALITÉ</a>
+      </nav>
+      <p class="footer-copy"><span id="year"></span> SPHERA FILMS · CANNES</p>
+    </div>
+  </footer>
+
+  <script src="js/lenis.js"></script>
+  <script src="js/gallery.js" type="module"></script>
+</body>
+</html>

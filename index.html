@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sphera Films | Agence Audiovisuelle</title>
+  <meta name="description" content="Sphera Films, agence de production audiovisuelle basée à Cannes. Créateurs d'images d'exception sur la French Riviera.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="css/site.css" rel="stylesheet">
+</head>
+<body>
+  <div class="bg-texture" aria-hidden="true"></div>
+
+  <header class="site-header site-header--centered" id="top">
+    <nav class="site-nav" aria-label="Navigation principale">
+      <div class="site-nav__brand">
+        <img class="site-nav__logo logo--silver" src="assets/logo-white.svg" alt="" width="88" height="93">
+        <p class="site-nav__wordmark">Sphera Films</p>
+      </div>
+      <div class="site-nav__links">
+        <a href="#hero">ACCUEIL</a>
+        <a href="#gallery">GALERIE</a>
+        <a href="#founders">FONDATEURS</a>
+        <a href="#faq">FAQ</a>
+        <a href="#contact" class="nav-cta">CONTACT</a>
+      </div>
+    </nav>
+    <button class="nav-toggle" type="button" aria-label="Menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </header>
+
+  <main>
+    <section class="hero" id="hero" aria-label="Accueil" data-aos="fade-up" data-aos-duration="1200">
+      <div class="hero__inner">
+        <div class="hero__brand">
+          <div class="hero__logo-wrap">
+            <span class="hero__logo-halo" aria-hidden="true"></span>
+            <img class="hero__logo logo--silver" src="assets/logo-white.svg" alt="" width="170" height="179">
+          </div>
+          <p class="hero__wordmark">Sphera Films</p>
+          <p class="hero__tagline">Agence audiovisuelle</p>
+        </div>
+
+        <div class="hero-videos" id="hero-videos" aria-label="Portfolio vidéo">
+          <div class="hero-videos__row">
+            <div class="hero-videos__viewport">
+              <div class="hero-videos__track hero-videos__track--fwd" id="hero-video-track-top"></div>
+            </div>
+          </div>
+          <div class="hero-videos__row">
+            <div class="hero-videos__viewport">
+              <div class="hero-videos__track hero-videos__track--rev" id="hero-video-track-bottom"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section brands" id="brands" aria-label="Ils nous font confiance" data-aos="fade-up" data-aos-duration="1200" data-aos-delay="80">
+      <p class="brands__label" data-aos="fade-up" data-aos-duration="1000" data-aos-delay="120">Ils nous font confiance</p>
+      <div class="marquee"><div class="marquee__track" id="marquee-track"></div></div>
+    </section>
+
+    <section class="section showcase" id="gallery" data-aos="fade-up" data-aos-duration="1200">
+      <div class="container">
+        <header class="section-head section-head--split" data-aos="fade-up" data-aos-duration="1000" data-aos-delay="80">
+          <div>
+            <p class="eyebrow">Galerie</p>
+            <h2 class="display display--sm">Notre travail</h2>
+          </div>
+          <p class="section-head__aside">Une sélection de nos productions sur la Riviera.</p>
+        </header>
+      </div>
+      <div class="showcase__mosaic-wrap" data-aos="fade-up" data-aos-duration="1200" data-aos-delay="160">
+        <div class="showcase-marquee" id="showcase-grid"></div>
+      </div>
+      <div class="container">
+        <div class="section-cta" data-aos="fade-up" data-aos-duration="1000" data-aos-delay="220">
+          <a class="btn btn--outline" href="gallerie.html">Voir la galerie complète</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section founders" id="founders" data-aos="fade-up" data-aos-duration="1200">
+      <div class="container">
+        <header class="section-head" data-aos="fade-up" data-aos-duration="1000">
+          <p class="eyebrow">Fondateurs</p>
+          <h2 class="display display--sm">Notre équipe</h2>
+        </header>
+        <div class="founders__row" data-aos="fade-up" data-aos-duration="1200" data-aos-delay="140">
+          <div class="founders__col founders__col--photo">
+            <img class="founders__img" id="founders-photo" src="assets/media/f09e28130786425c25ceaa9561def661.jpg?v=6" alt="Enzo Da Silva et Lani Giacinti, fondateurs Sphera Films" loading="lazy" decoding="async">
+          </div>
+          <div class="founders__col founders__col--copy">
+            <h3 class="founders__names" id="founders-names">Enzo Da Silva &amp; Lani Giacinti</h3>
+            <p class="founders__intro" id="founders-intro-text">Duo créatif à la tête de Sphera Films, Enzo et Lani unissent leurs visions pour donner vie à des projets audiovisuels haut de gamme.</p>
+            <article class="founder-bio">
+              <h4>Enzo Da Silva</h4>
+              <p id="founders-enzo-text"></p>
+            </article>
+            <article class="founder-bio">
+              <h4>Lani Giacinti</h4>
+              <p id="founders-lani-text"></p>
+            </article>
+            <p class="founders__together" id="founders-together-text"></p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section faq-contact" id="faq" aria-labelledby="faq-contact-title" data-aos="fade-up" data-aos-duration="1200">
+      <div class="container">
+        <header class="section-head section-head--center" data-aos="fade-up" data-aos-duration="1000" data-aos-delay="80">
+          <p class="eyebrow">Informations</p>
+          <h2 class="display display--sm" id="faq-contact-title">FAQ &amp; Contact</h2>
+        </header>
+        <div class="faq-contact__grid" data-aos="fade-up" data-aos-duration="1200" data-aos-delay="160">
+          <div class="faq-contact__col">
+            <h3 class="faq-contact__label">Questions fréquentes</h3>
+            <div class="faq" id="faq-list"></div>
+          </div>
+          <div class="faq-contact__col" id="contact">
+            <h3 class="faq-contact__label">Contactez-nous</h3>
+            <div class="faq-contact__icons" id="contact-social" aria-label="Réseaux et contact"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer" data-aos="fade-up" data-aos-duration="1200">
+    <div class="container site-footer__inner">
+      <a class="brand brand--footer" href="#top" id="footer-logo">
+        <img class="brand__mark logo--silver" src="assets/logo-white.svg" alt="">
+        <span class="brand__name">SPHERA FILMS</span>
+      </a>
+      <nav class="footer-nav">
+        <a href="mentions-legales.html">MENTIONS LÉGALES</a>
+        <a href="politique-de-confidentialite.html">POLITIQUE DE CONFIDENTIALITÉ</a>
+      </nav>
+      <p class="footer-copy"><span id="year"></span> SPHERA FILMS · CANNES</p>
+    </div>
+  </footer>
+
+  <script src="js/lenis.js"></script>
+  <script src="js/site.js" type="module"></script>
+</body>
+</html>

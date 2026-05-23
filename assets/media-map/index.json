@@ -1,0 +1,73 @@
+{
+  "source": "spherafilms.com Canva export (scripts/cache_*.html)",
+  "regenerate": "python scripts/organize_media.py",
+  "originalSiteSections": [
+    {
+      "id": "00-user-assets",
+      "where": "Global",
+      "what": "Your logo + background"
+    },
+    {
+      "id": "02-brand-marquee",
+      "where": "Home",
+      "what": "Client logos band"
+    },
+    {
+      "id": "03-hero",
+      "where": "Home top",
+      "what": "Autoplay video"
+    },
+    {
+      "id": "04-home-showcase",
+      "where": "Home",
+      "what": "Portfolio stills"
+    },
+    {
+      "id": "05-founders",
+      "where": "Home — Fondateurs",
+      "what": "Enzo + Lani photos"
+    },
+    {
+      "id": "07-vimeo-realisations",
+      "where": "Home — Nos réalisations",
+      "what": "Vimeo IDs"
+    },
+    {
+      "id": "06-social-icons",
+      "where": "Home — Contact",
+      "what": "Social icons only"
+    },
+    {
+      "id": "10-galerie-page",
+      "where": "gallerie.html",
+      "what": "Full photo gallery"
+    },
+    {
+      "id": "11-copy-text",
+      "where": "All pages",
+      "what": "French text content"
+    }
+  ],
+  "stats": {
+    "filesOnDisk": 97,
+    "galleryListedOnLiveSite": 268,
+    "galleryDownloaded": 26,
+    "vimeoVideos": 11,
+    "brandLogos": 10
+  },
+  "files": {
+    "00-user-assets": "00-user-assets.json",
+    "01-canva-logo-ui": "01-canva-logo-ui.json",
+    "02-brand-marquee": "02-brand-marquee.json",
+    "03-hero": "03-hero.json",
+    "04-home-showcase": "04-home-showcase.json",
+    "05-founders": "05-founders.json",
+    "06-social-icons": "06-social-icons.json",
+    "07-vimeo-realisations": "07-vimeo-realisations.json",
+    "08-local-videos": "08-local-videos.json",
+    "09-video-thumbnails": "09-video-thumbnails.json",
+    "10-galerie-page": "10-galerie-page.json",
+    "11-copy-text": "11-copy-text.json",
+    "99-unassigned": "99-unassigned.json"
+  }
+}

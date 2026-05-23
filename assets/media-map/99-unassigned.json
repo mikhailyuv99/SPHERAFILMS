@@ -1,0 +1,11 @@
+{
+  "description": "Files on disk not assigned above (review manually)",
+  "page": "unknown",
+  "order": [
+    "assets/media/15430ce4c716dcf666cc4d22e3a41eb4.png",
+    "assets/media/test.jpg"
+  ],
+  "missingOnDisk": [],
+  "countOnDisk": 2,
+  "countListed": 2
+}

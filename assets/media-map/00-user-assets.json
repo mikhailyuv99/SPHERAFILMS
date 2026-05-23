@@ -1,0 +1,10 @@
+{
+  "description": "Your custom assets (not from Canva scrape)",
+  "page": "global",
+  "order": [
+    "assets/logo.svg",
+    "assets/logo-white.svg",
+    "assets/bg-texture.png"
+  ],
+  "notes": "Use logo-white.svg in nav. bg-texture.png = site background."
+}
