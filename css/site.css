@@ -604,11 +604,11 @@ html.is-inapp body {
 
 @keyframes heroVideoMarqueeFwd {
   from { transform: translate3d(0, 0, 0); }
-  to { transform: translate3d(-50%, 0, 0); }
+  to { transform: translate3d(calc(-1 * var(--loop-w, 50%)), 0, 0); }
 }
 
 @keyframes heroVideoMarqueeRev {
-  from { transform: translate3d(-50%, 0, 0); }
+  from { transform: translate3d(calc(-1 * var(--loop-w, 50%)), 0, 0); }
   to { transform: translate3d(0, 0, 0); }
 }
 
@@ -2012,6 +2012,14 @@ body.lightbox-open {
     contain: none !important;
     mask-image: none !important;
     -webkit-mask-image: none !important;
+  }
+
+  .hero-videos__track {
+    gap: var(--hero-video-gap, 12px);
+  }
+
+  .hero-video-card {
+    flex-shrink: 0;
   }
 
   .marquee {
