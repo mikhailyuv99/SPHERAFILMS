@@ -103,15 +103,32 @@ button {
   margin-inline: auto;
 }
 
-/* Background — metallic sphere (blurred) */
+/* Background — metallic sphere (blurred); stable in in-app browsers */
 .bg-texture {
   position: fixed;
-  inset: -4%;
+  inset: 0;
   z-index: -2;
+  width: 100%;
+  height: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
   background: url("../assets/bg-texture.png") center / cover no-repeat;
+  background-attachment: scroll;
   filter: blur(14px) saturate(1.15) contrast(1.08);
-  transform: scale(1.08);
+  transform: translateZ(0);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
   pointer-events: none;
+}
+
+html.is-inapp .bg-texture {
+  inset: 0;
+  transform: none;
+}
+
+html.is-inapp,
+html.is-inapp body {
+  background-color: var(--bg);
 }
 
 .bg-texture::after {
@@ -804,7 +821,84 @@ button {
   to { transform: translateX(-50%); }
 }
 
-/* Page reveal — smooth fade-in on load (see page-reveal.js) */
+/* Site preloader — 5s logo + progress line (see js/preloader.js) */
+html.is-loading {
+  overflow: hidden;
+}
+
+html.is-loading body {
+  overflow: hidden;
+}
+
+.site-preloader {
+  position: fixed;
+  inset: 0;
+  z-index: 20000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #04080e;
+  transition:
+    opacity 0.52s var(--ease-reveal),
+    visibility 0.52s;
+}
+
+.site-preloader.is-done {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.site-preloader__inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.15rem;
+  width: min(88vw, 320px);
+  text-align: center;
+}
+
+.site-preloader__logo {
+  width: clamp(5.5rem, 22vw, 6.75rem);
+  height: auto;
+  object-fit: contain;
+}
+
+.site-preloader__wordmark {
+  margin: 0;
+  font-family: var(--font);
+  font-size: clamp(1.05rem, 4.2vw, 1.35rem);
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text);
+}
+
+.site-preloader__bar {
+  width: 100%;
+  height: 2px;
+  margin-top: 0.35rem;
+  background: rgba(255, 255, 255, 0.12);
+  overflow: hidden;
+}
+
+.site-preloader__fill {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, rgba(110, 190, 255, 0.85), #fff);
+  transform: scaleX(0);
+  transform-origin: left center;
+  animation: preloader-progress var(--preloader-duration, 5s) linear forwards;
+}
+
+@keyframes preloader-progress {
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* Page reveal — fade in after preloader */
 html:not(.is-revealed) body {
   opacity: 0;
 }
@@ -1749,11 +1843,9 @@ body.lightbox-open {
 
 /* Mobile */
 @media (max-width: 900px) {
-  /* No scroll-reveal — content visible immediately; Lenis scroll only */
-  html:not(.is-revealed) body,
+  /* No scroll-reveal — Lenis scroll only; page fade still after preloader */
   html.is-revealed body {
-    opacity: 1;
-    transition: none;
+    transition: opacity 0.85s var(--ease-reveal);
   }
 
   .reveal,
@@ -1875,10 +1967,6 @@ body.lightbox-open {
   .page-gallery .gallery-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 8px;
-  }
-
-  .page-gallery .gallery-grid__cell:last-child {
-    display: none;
   }
 
   .page-gallery .gallery-grid__cell {

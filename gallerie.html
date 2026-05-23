@@ -2,15 +2,47 @@
 <html lang="fr">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Galerie | Sphera Films</title>
   <meta name="description" content="Galerie photo Sphera Films, production audiovisuelle haut de gamme, Cannes.">
+  <script>document.documentElement.classList.add("is-loading");</script>
+  <script src="js/inapp-browser.js"></script>
+  <link rel="icon" href="favicon.ico" sizes="any">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="favicon-32x32.png" type="image/png" sizes="32x32">
+  <link rel="icon" href="favicon-16x16.png" type="image/png" sizes="16x16">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <meta name="theme-color" content="#04080e">
+  <link rel="canonical" href="https://spherafilms.com/gallerie.html">
+  <meta property="og:site_name" content="Sphera Films">
+  <meta property="og:title" content="Galerie | Sphera Films">
+  <meta property="og:description" content="Galerie photo Sphera Films, production audiovisuelle haut de gamme, Cannes.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://spherafilms.com/gallerie.html">
+  <meta property="og:locale" content="fr_FR">
+  <meta property="og:image" content="https://spherafilms.com/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Sphera Films — Galerie photo">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Galerie | Sphera Films">
+  <meta name="twitter:description" content="Galerie photo — production audiovisuelle à Cannes.">
+  <meta name="twitter:image" content="https://spherafilms.com/og-image.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link href="css/site.css" rel="stylesheet">
 </head>
 <body class="page-gallery">
+  <div id="site-preloader" class="site-preloader" aria-live="polite" aria-busy="true">
+    <div class="site-preloader__inner">
+      <img class="site-preloader__logo" src="assets/brand/logo-mark-white.svg" alt="" width="108" height="113">
+      <p class="site-preloader__wordmark">Sphera Films</p>
+      <div class="site-preloader__bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+        <span class="site-preloader__fill"></span>
+      </div>
+    </div>
+  </div>
   <div class="bg-texture" aria-hidden="true"></div>
 
   <header class="site-header site-header--centered" id="top">

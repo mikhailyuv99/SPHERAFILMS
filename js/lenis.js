@@ -1,7 +1,9 @@
 /**
- * Lenis smooth scroll
+ * Lenis smooth scroll (skipped in Instagram / in-app browsers — breaks fixed backgrounds)
  */
 (function () {
+  if (document.documentElement.classList.contains("is-inapp")) return;
+
   const s = document.createElement("script");
   s.src = "https://unpkg.com/lenis@1.1.18/dist/lenis.min.js";
   s.onload = () => {

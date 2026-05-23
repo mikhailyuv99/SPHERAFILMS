@@ -11,7 +11,13 @@ import {
 } from "./gallery-data.js";
 import { bindLightbox } from "./lightbox.js";
 import { initScrollReveal } from "./scroll-reveal.js";
-import { revealPage } from "./page-reveal.js";
+import {
+  startPreloader,
+  finishPreloader,
+  preloadImages,
+  collectHomePreloadUrls,
+  MOBILE_MQ,
+} from "./preloader.js";
 import { SOCIAL_ICONS } from "./social-icons.js";
 const MAP = "assets/media-map";
 const PHOTO_EXCLUDE = GALLERY_EXCLUDE;
@@ -90,6 +96,8 @@ function mergeCopy(copy) {
 }
 
 async function init() {
+  const preloaderWait = startPreloader();
+
   let copyData = { copy: FALLBACK_COPY, social: FALLBACK_SOCIAL, jotform: "" };
   let brands = { order: [] };
   let founders = { photo: "assets/media/founders.jpg" };
@@ -124,8 +132,13 @@ async function init() {
   setText("founders-together-text", copy.foundersTogether);
 
   const galleryItems = await loadGalleryPageOrder(PHOTO_EXCLUDE);
+  const brandPaths = dedupe(brands.order || []);
+  const preloadUrls = collectHomePreloadUrls(galleryItems, brandPaths, founders.photo);
+  const preloadWait = preloadImages(preloadUrls, {
+    limit: window.matchMedia(MOBILE_MQ).matches ? 32 : 20,
+  });
 
-  renderMarquee(dedupe(brands.order || []));
+  renderMarquee(brandPaths);
   renderHeroVideos(vimeo.vimeoIds || []);
   renderShowcase(galleryItems);
   renderFounders(founders);
@@ -136,8 +149,10 @@ async function init() {
   initHeroVideoCarousel();
   initFooterLogo();
   initFaq();
+
+  await Promise.all([preloaderWait, preloadWait]);
   document.body.classList.add("site-ready");
-  revealPage();
+  await finishPreloader();
   window.setTimeout(() => initScrollReveal(), 250);
 }
 
@@ -146,10 +161,13 @@ const LOGO_WHITE = new Set(["fc2f20543a9918c2f89d5674dd1518b0"]);
 function renderMarquee(logos) {
   const track = document.getElementById("marquee-track");
   if (!track || !logos.length) return;
+  const eager = window.matchMedia(MOBILE_MQ).matches;
   const items = logos
-    .map((src) => {
+    .map((src, i) => {
       const white = LOGO_WHITE.has(stem(src)) ? " marquee__logo--white" : "";
-      return `<img class="marquee__logo${white}" src="${src}" alt="" loading="lazy" decoding="async">`;
+      const load = eager && i < 8 ? "eager" : "lazy";
+      const priority = eager && i < 4 ? ' fetchpriority="high"' : "";
+      return `<img class="marquee__logo${white}" src="${src}" alt="" loading="${load}" decoding="async"${priority}>`;
     })
     .join("");
   const set = `<div class="marquee__set">${items}</div>`;
@@ -233,15 +251,18 @@ function closeVideo() {
   if (window.lenis) window.lenis.start();
 }
 
-function showcaseCell(item) {
+function showcaseCell(item, eager = false) {
+  const load = eager ? "eager" : "lazy";
+  const priority = eager ? ' fetchpriority="high"' : "";
   return `<figure class="showcase-marquee__cell" data-lightbox data-src="${item.src}" data-id="${item.id}">
-    <img src="${item.src}" alt="" loading="lazy" decoding="async" width="600" height="750">
+    <img src="${item.src}" alt="" loading="${load}" decoding="async" width="600" height="750"${priority}>
   </figure>`;
 }
 
-function renderShowcaseRow(rowItems, dir, duration) {
+function renderShowcaseRow(rowItems, dir, duration, eagerRow = false) {
   if (!rowItems.length) return "";
-  const cells = rowItems.map(showcaseCell).join("");
+  const eager = eagerRow && window.matchMedia(MOBILE_MQ).matches;
+  const cells = rowItems.map((item, i) => showcaseCell(item, eager && i < 6)).join("");
   const set = `<div class="showcase-marquee__set">${cells}</div>`;
   return `<div class="showcase-marquee__row">
     <div class="showcase-marquee__track showcase-marquee__track--${dir}" style="--duration:${duration}s">
@@ -262,7 +283,7 @@ function renderShowcase(items) {
 
   root.className = "showcase-marquee";
   root.innerHTML = SHOWCASE_ROWS.map((row, i) =>
-    renderShowcaseRow(rowPools[i] || [], row.dir, row.duration)
+    renderShowcaseRow(rowPools[i] || [], row.dir, row.duration, i < 2)
   )
     .filter(Boolean)
     .join("");
@@ -349,7 +370,12 @@ function initFooterLogo() {
 
 function renderFounders(data) {
   const img = document.getElementById("founders-photo");
-  if (img && data?.photo) img.src = data.photo;
+  if (!img || !data?.photo) return;
+  img.src = data.photo;
+  if (window.matchMedia(MOBILE_MQ).matches) {
+    img.loading = "eager";
+    img.fetchPriority = "high";
+  }
 }
 
 function scrollY() {
@@ -386,10 +412,10 @@ function initNavToggle() {
   });
 }
 
-init().catch((err) => {
+init().catch(async (err) => {
   console.error(err);
   document.body.classList.add("site-ready");
-  revealPage();
+  await finishPreloader();
   initScrollReveal();
   document.querySelectorAll("[data-aos], .reveal").forEach((el) => {
     el.style.opacity = "1";

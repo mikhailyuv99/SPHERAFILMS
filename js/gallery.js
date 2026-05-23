@@ -5,9 +5,17 @@
 import { GALLERY_EXCLUDE, loadGalleryPageOrder, uniqueGalleryItems } from "./gallery-data.js";
 import { bindLightbox } from "./lightbox.js";
 import { initScrollReveal } from "./scroll-reveal.js";
-import { revealPage } from "./page-reveal.js";
+import {
+  startPreloader,
+  finishPreloader,
+  preloadImages,
+  collectGalleryPreloadUrls,
+  MOBILE_MQ,
+} from "./preloader.js";
 
 async function init() {
+  const preloaderWait = startPreloader();
+
   let items = await loadGalleryPageOrder(GALLERY_EXCLUDE);
   items = uniqueGalleryItems(items, GALLERY_EXCLUDE);
 
@@ -16,7 +24,8 @@ async function init() {
 
   const grid = document.getElementById("gallery-grid");
   if (!grid) {
-    revealPage();
+    await Promise.all([preloaderWait]);
+    await finishPreloader();
     return;
   }
 
@@ -24,7 +33,8 @@ async function init() {
     grid.innerHTML = `<p class="gallery-empty">Galerie en cours de chargement.</p>`;
     initHeader();
     initNavToggle();
-    revealPage();
+    await Promise.all([preloaderWait]);
+    await finishPreloader();
     window.setTimeout(() => initScrollReveal(), 250);
     return;
   }
@@ -38,13 +48,21 @@ async function init() {
     return true;
   });
 
-  grid.innerHTML = unique
-    .map(
-      (item) =>
-        `<figure class="gallery-grid__cell" data-lightbox data-src="${item.src}" data-id="${item.id}">
-          <img src="${item.src}" alt="" loading="lazy" decoding="async" width="800" height="1000">
-        </figure>`
-    )
+  const mobile = window.matchMedia(MOBILE_MQ).matches;
+  const display = mobile && unique.length > 1 ? unique.slice(0, -1) : unique;
+  const preloadWait = preloadImages(collectGalleryPreloadUrls(display), {
+    limit: mobile ? 30 : 18,
+  });
+
+  grid.innerHTML = display
+    .map((item, i) => {
+      const eager = mobile && i < 16;
+      const load = eager ? "eager" : "lazy";
+      const priority = eager ? ' fetchpriority="high"' : "";
+      return `<figure class="gallery-grid__cell" data-lightbox data-src="${item.src}" data-id="${item.id}">
+          <img src="${item.src}" alt="" loading="${load}" decoding="async" width="800" height="1000"${priority}>
+        </figure>`;
+    })
     .join("");
 
   grid.querySelectorAll(".gallery-grid__cell img").forEach((img) => {
@@ -54,7 +72,9 @@ async function init() {
   bindLightbox(grid, "[data-lightbox]");
   initHeader();
   initNavToggle();
-  revealPage();
+
+  await Promise.all([preloaderWait, preloadWait]);
+  await finishPreloader();
   window.setTimeout(() => initScrollReveal(), 250);
 }
 
@@ -91,8 +111,8 @@ function initNavToggle() {
   });
 }
 
-init().catch((err) => {
+init().catch(async (err) => {
   console.error(err);
-  revealPage();
+  await finishPreloader();
   window.setTimeout(() => initScrollReveal(), 250);
 });
