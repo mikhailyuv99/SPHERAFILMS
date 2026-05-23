@@ -72,8 +72,8 @@ const FALLBACK_COPY = {
 
 const FALLBACK_SOCIAL = {
   instagram: "https://www.instagram.com/spherafilms",
-  linkedin: "https://www.linkedin.com/in/sphera-films-2a9956343/",
-  facebook: "https://www.facebook.com/spherafilms",
+  linkedin: "https://www.linkedin.com/company/sphera-films",
+  youtube: "https://www.youtube.com/watch?v=d_y8a-BHyiQ",
   whatsapp: "https://wa.me/33652886288",
 };
 
@@ -129,6 +129,9 @@ async function init() {
 
   const copy = mergeCopy(copyData.copy || {});
   const social = { ...FALLBACK_SOCIAL, ...(copyData.social || {}) };
+  if (!social.youtube && social.facebook) {
+    social.youtube = FALLBACK_SOCIAL.youtube;
+  }
 
   const yearEl = document.getElementById("year");
   if (yearEl) yearEl.textContent = String(new Date().getFullYear());
@@ -158,7 +161,8 @@ async function init() {
       const img = card.querySelector("img");
       if (url && img && img.src !== url) img.src = url;
     });
-    syncHeroMarqueeLoops();
+    if (mobile) initMobileHeroMarquees();
+    else syncHeroMarqueeLoops();
   }
   const vimeoThumbUrls = mobile ? vimeoIds.map((id) => thumbMap[id]).filter(Boolean) : [];
 
@@ -181,7 +185,7 @@ async function init() {
   await Promise.all([minWait, preloadWait]);
   if (mobile) {
     await waitForDomImages([".marquee", ".hero-videos"], { timeout: 22000 });
-    syncHeroMarqueeLoops();
+    initMobileHeroMarquees();
   }
   document.body.classList.add("site-ready");
   await finishPreloader();
@@ -189,6 +193,11 @@ async function init() {
 }
 
 const LOGO_WHITE = new Set(["fc2f20543a9918c2f89d5674dd1518b0"]);
+const LOGO_LARGE = new Set([
+  "6fbf1b251541154a6934b7190875b5f4", // IZIPIZI
+  "95471e4a40b667fab94d711c30697a66", // APM Monaco
+  "a4671c3cdc93430705491cd465b7215a", // BMW
+]);
 
 function renderMarquee(logos) {
   const track = document.getElementById("marquee-track");
@@ -197,10 +206,11 @@ function renderMarquee(logos) {
   const items = logos
     .map((src, i) => {
       const white = LOGO_WHITE.has(stem(src)) ? " marquee__logo--white" : "";
+      const large = LOGO_LARGE.has(stem(src)) ? " marquee__logo--lg" : "";
       const decode = mobile ? ' decoding="sync"' : ' decoding="async"';
       const load = mobile ? "eager" : "lazy";
       const priority = mobile && i < 10 ? ' fetchpriority="high"' : "";
-      return `<img class="marquee__logo${white}" src="${src}" alt="" loading="${load}"${decode}${priority}>`;
+      return `<img class="marquee__logo${white}${large}" src="${src}" alt="" loading="${load}"${decode}${priority}>`;
     })
     .join("");
   const set = `<div class="marquee__set">${items}</div>`;
@@ -254,7 +264,71 @@ function syncHeroMarqueeLoop(track) {
   else track.style.removeProperty("--loop-w");
 }
 
+let mobileHeroMarquees = [];
+
+function measureHeroLoop(track) {
+  const cards = track.querySelectorAll(".hero-video-card");
+  const half = cards.length / 2;
+  if (!Number.isInteger(half) || half < 1 || !cards[half]) return 0;
+  return Math.round(cards[half].offsetLeft - cards[0].offsetLeft);
+}
+
+function stopMobileHeroMarquees() {
+  mobileHeroMarquees.forEach((state) => {
+    state.active = false;
+    if (state.raf) cancelAnimationFrame(state.raf);
+  });
+  mobileHeroMarquees = [];
+}
+
+function startMobileHeroMarquee(track, direction) {
+  const speed = direction < 0 ? 0.65 : 0.6;
+  const loopW = measureHeroLoop(track);
+  if (loopW <= 0) return;
+
+  let offset = direction < 0 ? 0 : -loopW;
+  const state = { track, active: true, raf: 0, direction, speed, loopW, offset };
+
+  const tick = () => {
+    if (!state.active) return;
+    if (state.direction < 0) {
+      state.offset -= state.speed;
+      if (state.offset <= -state.loopW) state.offset += state.loopW;
+    } else {
+      state.offset += state.speed;
+      if (state.offset >= 0) state.offset -= state.loopW;
+    }
+    state.track.style.transform = `translate3d(${state.offset}px, 0, 0)`;
+    state.raf = requestAnimationFrame(tick);
+  };
+
+  state.raf = requestAnimationFrame(tick);
+  mobileHeroMarquees.push(state);
+}
+
+function initMobileHeroMarquees() {
+  if (!isMobileLayout()) return;
+  stopMobileHeroMarquees();
+
+  const top = document.getElementById("hero-video-track-top");
+  const bottom = document.getElementById("hero-video-track-bottom");
+
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      if (top) {
+        top.style.animation = "none";
+        startMobileHeroMarquee(top, -1);
+      }
+      if (bottom) {
+        bottom.style.animation = "none";
+        startMobileHeroMarquee(bottom, 1);
+      }
+    });
+  });
+}
+
 function syncHeroMarqueeLoops(root = document) {
+  if (isMobileLayout()) return;
   root.querySelectorAll(".hero-videos__track").forEach((track) => {
     syncHeroMarqueeLoop(track);
   });
@@ -281,8 +355,11 @@ function renderHeroVideos(ids, thumbMap = {}) {
   fillTrack(bottomTrack, ids.slice(HERO_VIDEOS_TOP, HERO_VIDEOS_TOP + HERO_VIDEOS_BOTTOM));
 
   requestAnimationFrame(() => {
-    syncHeroMarqueeLoops();
-    requestAnimationFrame(() => syncHeroMarqueeLoops());
+    if (isMobileLayout()) initMobileHeroMarquees();
+    else {
+      syncHeroMarqueeLoops();
+      requestAnimationFrame(() => syncHeroMarqueeLoops());
+    }
   });
 }
 
@@ -347,7 +424,7 @@ function initHeroVideoCarousel() {
     "resize",
     () => {
       window.clearTimeout(resizeTimer);
-      resizeTimer = window.setTimeout(() => syncHeroMarqueeLoops(), 120);
+      resizeTimer = window.setTimeout(() => initMobileHeroMarquees(), 120);
     },
     { passive: true }
   );
@@ -361,6 +438,8 @@ function initHeroVideoCarousel() {
       }
     });
   });
+
+  initMobileHeroMarquees();
 }
 
 function openVideo(id) {
@@ -456,7 +535,7 @@ function renderFaqContact(social, copy) {
 
   const socialLinks = [
     { href: social.instagram, label: "Instagram", icon: "instagram", external: true },
-    { href: social.facebook, label: "Facebook", icon: "facebook", external: true },
+    { href: social.youtube, label: "YouTube", icon: "youtube", external: true },
     { href: social.linkedin, label: "LinkedIn", icon: "linkedin", external: true },
   ].filter((l) => l.href);
 

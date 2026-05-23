@@ -495,6 +495,7 @@ html.is-inapp body {
 .hero-videos__track {
   display: flex;
   width: max-content;
+  gap: var(--hero-video-gap, 12px);
   will-change: transform;
   pointer-events: none;
 }
@@ -508,9 +509,7 @@ html.is-inapp body {
 }
 
 .hero-videos__set {
-  display: flex;
-  align-items: stretch;
-  gap: var(--hero-video-gap, 12px);
+  display: contents;
 }
 
 .hero-video-card {
@@ -831,6 +830,11 @@ html.is-inapp body {
 
 .marquee__logo--white {
   filter: brightness(0) invert(1);
+}
+
+.marquee__logo--lg {
+  height: clamp(4.25rem, 9vw, 6.75rem);
+  max-width: 22rem;
 }
 
 @keyframes marquee {
@@ -2015,11 +2019,17 @@ body.lightbox-open {
   }
 
   .hero-videos__track {
-    gap: var(--hero-video-gap, 12px);
+    gap: var(--hero-video-gap, 14px);
   }
 
   .hero-video-card {
     flex-shrink: 0;
+    flex-basis: min(72vw, 280px);
+  }
+
+  .hero-videos__track--fwd,
+  .hero-videos__track--rev {
+    animation: none !important;
   }
 
   .marquee {
