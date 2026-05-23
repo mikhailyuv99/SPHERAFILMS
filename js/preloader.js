@@ -25,32 +25,58 @@ export function startPreloader() {
   return waitPreloaderMin();
 }
 
-export function preloadImages(urls, { limit = 40, timeout = 12000 } = {}) {
+function loadImage(src) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    const done = () => resolve(src);
+    img.onload = () => {
+      if (img.decode) img.decode().then(done).catch(done);
+      else done();
+    };
+    img.onerror = done;
+    img.src = src;
+  });
+}
+
+export function preloadImages(urls, { limit = 40, timeout = 12000, required = false } = {}) {
   const list = [...new Set(urls.filter(Boolean))].slice(0, limit);
   if (!list.length) return Promise.resolve();
 
+  const loads = Promise.all(list.map(loadImage));
+  if (required) return loads;
+  return Promise.race([loads, new Promise((resolve) => window.setTimeout(resolve, timeout))]);
+}
+
+/** Wait until marquee / hero imgs in DOM have decoded (mobile). */
+export function waitForDomImages(selectors, { timeout = 20000 } = {}) {
+  const imgs = selectors.flatMap((sel) => [...document.querySelectorAll(`${sel} img`)]);
+  if (!imgs.length) return Promise.resolve();
+
+  const pending = imgs.map(
+    (img) =>
+      new Promise((resolve) => {
+        if (img.complete && img.naturalWidth > 0) {
+          if (img.decode) img.decode().then(resolve).catch(resolve);
+          else resolve();
+          return;
+        }
+        const done = () => resolve();
+        img.addEventListener("load", done, { once: true });
+        img.addEventListener("error", done, { once: true });
+      })
+  );
+
   return Promise.race([
-    Promise.all(
-      list.map(
-        (src) =>
-          new Promise((resolve) => {
-            const img = new Image();
-            img.decoding = "async";
-            img.onload = img.onerror = () => resolve();
-            img.src = src;
-          })
-      )
-    ),
+    Promise.all(pending),
     new Promise((resolve) => window.setTimeout(resolve, timeout)),
   ]);
 }
 
-export function collectHomePreloadUrls(galleryItems, brandPaths, foundersPhoto, vimeoIds = []) {
+export function collectHomePreloadUrls(galleryItems, brandPaths, foundersPhoto, vimeoThumbUrls = []) {
   const mobile = isMobileLayout();
-  const urls = [...brandPaths];
-  vimeoIds.forEach((id) => urls.push(`https://vumbnail.com/${id}.jpg`));
+  const urls = [...brandPaths, ...vimeoThumbUrls];
   if (foundersPhoto) urls.push(foundersPhoto);
-  galleryItems.slice(0, mobile ? 20 : 12).forEach((item) => urls.push(item.src));
+  galleryItems.slice(0, mobile ? 16 : 12).forEach((item) => urls.push(item.src));
   return urls;
 }
 

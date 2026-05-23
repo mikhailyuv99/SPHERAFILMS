@@ -819,7 +819,7 @@ html.is-loading body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #04080e;
+  background: transparent;
   transition:
     opacity 0.52s var(--ease-reveal),
     visibility 0.52s;
@@ -1893,7 +1893,30 @@ body.lightbox-open {
     text-align: center;
   }
 
-  /* Auto-scrolling marquees on mobile */
+  /* Auto-scrolling marquees on mobile — fix iOS paint (no mask/contain) */
+  .hero-videos {
+    contain: none;
+    mask-image: none;
+    -webkit-mask-image: none;
+  }
+
+  .marquee {
+    mask-image: none;
+    -webkit-mask-image: none;
+  }
+
+  .hero-videos__track,
+  .marquee__track {
+    will-change: transform;
+    -webkit-transform: translate3d(0, 0, 0);
+    transform: translate3d(0, 0, 0);
+  }
+
+  .hero-videos:not(.is-marquee-ready) .hero-videos__track,
+  .marquee:not(.is-marquee-ready) .marquee__track {
+    animation-play-state: paused;
+  }
+
   .hero-videos__track--fwd,
   .hero-videos__track--rev,
   .marquee__track,

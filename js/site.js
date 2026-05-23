@@ -16,8 +16,10 @@ import {
   finishPreloader,
   preloadImages,
   collectHomePreloadUrls,
+  waitForDomImages,
   isMobileLayout,
 } from "./preloader.js";
+import { resolveVimeoThumbs } from "./vimeo-thumbs.js";
 import { SOCIAL_ICONS } from "./social-icons.js";
 const MAP = "assets/media-map";
 const PHOTO_EXCLUDE = GALLERY_EXCLUDE;
@@ -134,13 +136,20 @@ async function init() {
   const vimeoIds = vimeo.vimeoIds || [];
   const galleryItems = await loadGalleryPageOrder(PHOTO_EXCLUDE);
   const brandPaths = dedupe(brands.order || []);
-  const preloadUrls = collectHomePreloadUrls(galleryItems, brandPaths, founders.photo, vimeoIds);
+
+  const mobile = isMobileLayout();
+  const thumbMap = mobile ? await resolveVimeoThumbs(vimeoIds) : {};
+  const vimeoThumbUrls = mobile ? vimeoIds.map((id) => thumbMap[id]).filter(Boolean) : [];
+
+  const preloadUrls = collectHomePreloadUrls(galleryItems, brandPaths, founders.photo, vimeoThumbUrls);
   const preloadWait = preloadImages(preloadUrls, {
-    limit: isMobileLayout() ? 40 : 24,
+    limit: mobile ? 50 : 24,
+    timeout: mobile ? 30000 : 12000,
+    required: mobile,
   });
 
   renderMarquee(brandPaths);
-  renderHeroVideos(vimeoIds);
+  renderHeroVideos(vimeoIds, thumbMap);
   renderShowcase(galleryItems);
   renderFounders(founders);
   renderFaqContact(social, copy);
@@ -151,7 +160,16 @@ async function init() {
   initFooterLogo();
   initFaq();
 
+  if (mobile) {
+    document.querySelectorAll(".hero-videos, .marquee").forEach((el) => {
+      el.classList.add("is-marquee-ready");
+    });
+  }
+
   await Promise.all([minWait, preloadWait]);
+  if (mobile) {
+    await waitForDomImages([".marquee", ".hero-videos"], { timeout: 22000 });
+  }
   document.body.classList.add("site-ready");
   await finishPreloader();
   window.setTimeout(() => initScrollReveal(), 250);
@@ -166,25 +184,27 @@ function renderMarquee(logos) {
   const items = logos
     .map((src, i) => {
       const white = LOGO_WHITE.has(stem(src)) ? " marquee__logo--white" : "";
+      const decode = mobile ? ' decoding="sync"' : ' decoding="async"';
       const load = mobile ? "eager" : "lazy";
       const priority = mobile && i < 10 ? ' fetchpriority="high"' : "";
-      return `<img class="marquee__logo${white}" src="${src}" alt="" loading="${load}" decoding="async"${priority}>`;
+      return `<img class="marquee__logo${white}" src="${src}" alt="" loading="${load}"${decode}${priority}>`;
     })
     .join("");
   const set = `<div class="marquee__set">${items}</div>`;
   track.innerHTML = `${set}<div class="marquee__set" aria-hidden="true">${items}</div>`;
 }
 
-function renderHeroVideos(ids) {
+function renderHeroVideos(ids, thumbMap = {}) {
   const topTrack = document.getElementById("hero-video-track-top");
   const bottomTrack = document.getElementById("hero-video-track-bottom");
   if (!topTrack || !bottomTrack || !ids.length) return;
 
   const mobile = isMobileLayout();
+  const poster = (id) => thumbMap[id] || `https://vumbnail.com/${id}.jpg`;
   const card = (id) =>
     `<article class="hero-video-card" data-vimeo="${id}" role="button" tabindex="0" aria-label="Lire la vidéo">
       <div class="hero-video-card__media">
-        <img src="https://vumbnail.com/${id}.jpg" alt="" loading="${mobile ? "eager" : "lazy"}" decoding="async">
+        <img src="${poster(id)}" alt="" loading="${mobile ? "eager" : "lazy"}" decoding="${mobile ? "sync" : "async"}">
         <span class="hero-video-card__play" aria-hidden="true"></span>
       </div>
     </article>`;
