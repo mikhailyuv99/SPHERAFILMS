@@ -568,21 +568,72 @@ html.is-inapp body {
   overflow: hidden;
 }
 
-.hero-video-card__media img {
+.hero-video-card__poster {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
+  z-index: 1;
+  transition: opacity 0.4s;
+}
+
+.hero-video-card__media.is-playing .hero-video-card__poster {
+  opacity: 0;
+  pointer-events: none;
 }
 
 .hero-video-card__player {
   position: absolute;
   inset: 0;
+  z-index: 2;
 }
 
 .hero-video-card__player iframe {
+  position: absolute;
+  top: 50%;
+  left: 50%;
   width: 100%;
   height: 100%;
+  min-width: 100%;
+  min-height: 100%;
   border: 0;
+  transform: translate(-50%, -50%) scale(1.2);
+  pointer-events: none;
+}
+
+.hero-video-card__expand {
+  position: absolute;
+  right: 0.5rem;
+  bottom: 0.5rem;
+  z-index: 4;
+  width: 2.35rem;
+  height: 2.35rem;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  background: rgba(4, 8, 14, 0.72);
+  cursor: pointer;
+  pointer-events: auto;
+  transition: border-color 0.25s, background 0.25s;
+}
+
+.hero-video-card__expand::before {
+  content: "";
+  display: block;
+  width: 0.85rem;
+  height: 0.85rem;
+  margin: 0.55rem auto 0;
+  border: 2px solid #fff;
+  box-shadow: 3px 3px 0 -1px #04080e, 3px 3px 0 0 #fff;
+}
+
+.hero-video-card__expand:hover {
+  border-color: rgba(142, 200, 255, 0.65);
+  background: rgba(4, 8, 14, 0.9);
+}
+
+.hero-video-card__media:has(.hero-video-card__player) .hero-video-card__play {
+  display: none;
 }
 
 @keyframes heroVideoMarqueeFwd {
@@ -828,6 +879,12 @@ html.is-loading {
 
 html.is-loading body {
   overflow: hidden;
+}
+
+html.is-loading .site-header,
+html.is-loading main,
+html.is-loading .site-footer {
+  visibility: hidden;
 }
 
 .site-preloader {
@@ -1922,6 +1979,78 @@ body.lightbox-open {
 
   .faq-contact .section-head--center {
     text-align: center;
+  }
+
+  /* Touch swipe rails — videos, brand logos, showcase (mobile only) */
+  html.is-mobile-rail .hero-videos,
+  html.is-mobile-rail .marquee,
+  html.is-mobile-rail .showcase__mosaic-wrap {
+    mask-image: none;
+  }
+
+  html.is-mobile-rail .hero-videos__row {
+    overflow: visible;
+  }
+
+  html.is-mobile-rail .hero-videos__viewport.js-touch-rail,
+  html.is-mobile-rail .marquee.js-touch-rail,
+  html.is-mobile-rail .showcase-marquee__viewport.js-touch-rail {
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x mandatory;
+    overscroll-behavior-x: contain;
+    touch-action: pan-x;
+    scrollbar-width: none;
+  }
+
+  html.is-mobile-rail .hero-videos__viewport.js-touch-rail::-webkit-scrollbar,
+  html.is-mobile-rail .marquee.js-touch-rail::-webkit-scrollbar,
+  html.is-mobile-rail .showcase-marquee__viewport.js-touch-rail::-webkit-scrollbar {
+    display: none;
+  }
+
+  html.is-mobile-rail .hero-videos__track,
+  html.is-mobile-rail .marquee__track {
+    animation: none !important;
+    transform: none !important;
+    width: max-content;
+    pointer-events: auto;
+  }
+
+  html.is-mobile-rail .hero-videos__set,
+  html.is-mobile-rail .marquee__set,
+  html.is-mobile-rail .showcase-marquee__set {
+    display: flex;
+    align-items: stretch;
+    width: max-content;
+  }
+
+  html.is-mobile-rail .hero-video-card {
+    flex: 0 0 min(84vw, 360px);
+    scroll-snap-align: start;
+  }
+
+  html.is-mobile-rail .marquee__logo {
+    scroll-snap-align: center;
+    flex-shrink: 0;
+  }
+
+  html.is-mobile-rail .showcase-marquee__cell {
+    flex: 0 0 min(72vw, 280px);
+    scroll-snap-align: start;
+    min-height: 220px;
+    aspect-ratio: 4 / 5;
+  }
+
+  html.is-mobile-rail .showcase-marquee__row {
+    overflow: visible;
+    margin-bottom: 0.5rem;
+  }
+
+  html.is-mobile-rail .marquee__set {
+    gap: clamp(2rem, 8vw, 3.5rem);
+    padding-inline: 1.25rem;
   }
 
   .faq__q {

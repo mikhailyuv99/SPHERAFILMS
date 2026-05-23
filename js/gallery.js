@@ -10,7 +10,8 @@ import {
   finishPreloader,
   preloadImages,
   collectGalleryPreloadUrls,
-  MOBILE_MQ,
+  waitForSectionImages,
+  isMobileLayout,
 } from "./preloader.js";
 
 async function init() {
@@ -48,7 +49,7 @@ async function init() {
     return true;
   });
 
-  const mobile = window.matchMedia(MOBILE_MQ).matches;
+  const mobile = isMobileLayout();
   const display = mobile && unique.length > 1 ? unique.slice(0, -1) : unique;
   const preloadWait = preloadImages(collectGalleryPreloadUrls(display), {
     limit: mobile ? 30 : 18,
@@ -74,6 +75,7 @@ async function init() {
   initNavToggle();
 
   await Promise.all([preloaderWait, preloadWait]);
+  await waitForSectionImages([".gallery-grid"], { timeout: 14000 });
   await finishPreloader();
   window.setTimeout(() => initScrollReveal(), 250);
 }

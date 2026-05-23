@@ -1,8 +1,12 @@
 /**
- * 5s loading screen — logo, wordmark, progress line + image preload
+ * Loading screen — min 5s + wait for critical home/gallery media
  */
 const MIN_MS = 5000;
 export const MOBILE_MQ = "(max-width: 900px)";
+
+export function isMobileLayout() {
+  return window.matchMedia(MOBILE_MQ).matches;
+}
 
 export function startPreloader() {
   document.documentElement.classList.add("is-loading");
@@ -11,7 +15,7 @@ export function startPreloader() {
   return new Promise((resolve) => window.setTimeout(resolve, MIN_MS));
 }
 
-export function preloadImages(urls, { limit = 28, timeout = 15000 } = {}) {
+export function preloadImages(urls, { limit = 40, timeout = 20000 } = {}) {
   const list = [...new Set(urls.filter(Boolean))].slice(0, limit);
   if (!list.length) return Promise.resolve();
 
@@ -31,18 +35,41 @@ export function preloadImages(urls, { limit = 28, timeout = 15000 } = {}) {
   ]);
 }
 
-export function collectHomePreloadUrls(galleryItems, brandPaths, foundersPhoto) {
-  const mobile = window.matchMedia(MOBILE_MQ).matches;
-  const urls = [];
+/** After DOM render — wait for visible <img> elements in key sections */
+export function waitForSectionImages(selectors, { timeout = 18000 } = {}) {
+  const imgs = selectors.flatMap((sel) => [...document.querySelectorAll(`${sel} img`)]);
+  if (!imgs.length) return Promise.resolve();
+
+  const pending = imgs.map(
+    (img) =>
+      new Promise((resolve) => {
+        if (img.complete && img.naturalWidth > 0) {
+          resolve();
+          return;
+        }
+        const done = () => resolve();
+        img.addEventListener("load", done, { once: true });
+        img.addEventListener("error", done, { once: true });
+      })
+  );
+
+  return Promise.race([
+    Promise.all(pending),
+    new Promise((resolve) => window.setTimeout(resolve, timeout)),
+  ]);
+}
+
+export function collectHomePreloadUrls(galleryItems, brandPaths, foundersPhoto, vimeoIds = []) {
+  const mobile = isMobileLayout();
+  const urls = [...brandPaths];
+  vimeoIds.forEach((id) => urls.push(`https://vumbnail.com/${id}.jpg`));
   if (foundersPhoto) urls.push(foundersPhoto);
-  brandPaths.slice(0, mobile ? 10 : 6).forEach((p) => urls.push(p));
-  galleryItems.slice(0, mobile ? 24 : 12).forEach((item) => urls.push(item.src));
+  galleryItems.slice(0, mobile ? 28 : 12).forEach((item) => urls.push(item.src));
   return urls;
 }
 
 export function collectGalleryPreloadUrls(items) {
-  const mobile = window.matchMedia(MOBILE_MQ).matches;
-  const n = mobile ? 30 : 18;
+  const n = isMobileLayout() ? 32 : 18;
   return items.slice(0, n).map((item) => item.src);
 }
 
