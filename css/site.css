@@ -519,12 +519,11 @@ html.is-inapp body {
   border: 1px solid var(--line);
   background: #0a0a0a;
   pointer-events: auto;
-  transition: border-color 0.35s, box-shadow 0.35s;
+  transition: border-color 0.35s;
 }
 
 .hero-video-card:hover {
   border-color: rgba(142, 200, 255, 0.45);
-  box-shadow: 0 0 32px rgba(110, 190, 255, 0.18);
   position: relative;
   z-index: 2;
 }
