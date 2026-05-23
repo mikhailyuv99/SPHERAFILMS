@@ -19,14 +19,17 @@ export async function resolveVimeoThumb(id) {
 
   let url = null;
   try {
-    const res = await fetch(`https://vimeo.com/api/v2/video/${id}.json`);
+    const ctrl = new AbortController();
+    const timer = window.setTimeout(() => ctrl.abort(), 8000);
+    const res = await fetch(`https://vimeo.com/api/v2/video/${id}.json`, { signal: ctrl.signal });
+    window.clearTimeout(timer);
     if (res.ok) {
       const data = await res.json();
       const v = data?.[0];
       url = v?.thumbnail_large || v?.thumbnail_medium || v?.thumbnail_small || null;
     }
   } catch (_) {
-    /* network */
+    /* network / timeout */
   }
 
   if (!url) url = `https://vumbnail.com/${id}.jpg`;

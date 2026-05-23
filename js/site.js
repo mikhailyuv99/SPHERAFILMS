@@ -10,7 +10,7 @@ import {
   stem,
 } from "./gallery-data.js";
 import { bindLightbox } from "./lightbox.js";
-import { initScrollReveal } from "./scroll-reveal.js";
+import { initScrollReveal, disableScrollReveal } from "./scroll-reveal.js";
 import {
   startPreloader,
   finishPreloader,
@@ -98,6 +98,17 @@ function mergeCopy(copy) {
 }
 
 async function init() {
+  const mobile = isMobileLayout();
+  if (mobile) {
+    document.documentElement.classList.add("is-mobile-home");
+    disableScrollReveal();
+    ["hero", "brands"].forEach((id) => {
+      const section = document.getElementById(id);
+      section?.removeAttribute("data-aos");
+      section?.querySelectorAll("[data-aos]").forEach((el) => el.removeAttribute("data-aos"));
+    });
+  }
+
   const minWait = startPreloader();
 
   let copyData = { copy: FALLBACK_COPY, social: FALLBACK_SOCIAL, jotform: "" };
@@ -137,8 +148,17 @@ async function init() {
   const galleryItems = await loadGalleryPageOrder(PHOTO_EXCLUDE);
   const brandPaths = dedupe(brands.order || []);
 
-  const mobile = isMobileLayout();
+  renderMarquee(brandPaths);
+  renderHeroVideos(vimeoIds, {});
+
   const thumbMap = mobile ? await resolveVimeoThumbs(vimeoIds) : {};
+  if (mobile && Object.keys(thumbMap).length) {
+    document.querySelectorAll(".hero-video-card[data-vimeo]").forEach((card) => {
+      const url = thumbMap[card.dataset.vimeo];
+      const img = card.querySelector("img");
+      if (url && img && img.src !== url) img.src = url;
+    });
+  }
   const vimeoThumbUrls = mobile ? vimeoIds.map((id) => thumbMap[id]).filter(Boolean) : [];
 
   const preloadUrls = collectHomePreloadUrls(galleryItems, brandPaths, founders.photo, vimeoThumbUrls);
@@ -147,9 +167,6 @@ async function init() {
     timeout: mobile ? 30000 : 12000,
     required: mobile,
   });
-
-  renderMarquee(brandPaths);
-  renderHeroVideos(vimeoIds, thumbMap);
   renderShowcase(galleryItems);
   renderFounders(founders);
   renderFaqContact(social, copy);
@@ -160,19 +177,13 @@ async function init() {
   initFooterLogo();
   initFaq();
 
-  if (mobile) {
-    document.querySelectorAll(".hero-videos, .marquee").forEach((el) => {
-      el.classList.add("is-marquee-ready");
-    });
-  }
-
   await Promise.all([minWait, preloadWait]);
   if (mobile) {
     await waitForDomImages([".marquee", ".hero-videos"], { timeout: 22000 });
   }
   document.body.classList.add("site-ready");
   await finishPreloader();
-  window.setTimeout(() => initScrollReveal(), 250);
+  if (!mobile) window.setTimeout(() => initScrollReveal(), 250);
 }
 
 const LOGO_WHITE = new Set(["fc2f20543a9918c2f89d5674dd1518b0"]);
@@ -434,9 +445,10 @@ function initNavToggle() {
 
 init().catch(async (err) => {
   console.error(err);
+  if (isMobileLayout()) disableScrollReveal();
   document.body.classList.add("site-ready");
   await finishPreloader();
-  initScrollReveal();
+  if (!isMobileLayout()) initScrollReveal();
   document.querySelectorAll("[data-aos], .reveal").forEach((el) => {
     el.style.opacity = "1";
     el.style.transform = "none";

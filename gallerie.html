@@ -7,9 +7,12 @@
   <meta name="description" content="Galerie photo Sphera Films, production audiovisuelle haut de gamme, Cannes.">
   <script>window.__SF_PAGE_START=Date.now();document.documentElement.classList.add("is-loading");</script>
   <style>
-    .site-preloader{position:fixed;inset:0;z-index:2147483647;display:flex;align-items:center;justify-content:center;background:transparent}
     html.is-loading{overflow:hidden}
     html.is-loading body{overflow:hidden}
+    html.is-loading .site-header,html.is-loading main,html.is-loading .site-footer,html.is-loading .bg-texture{display:none!important}
+    .site-preloader{position:fixed;inset:0;z-index:2147483647;display:flex;align-items:center;justify-content:center}
+    .site-preloader__bg{position:fixed;inset:-4%;z-index:-1;background:url("assets/bg-texture.png") center/cover no-repeat;filter:blur(14px) saturate(1.15) contrast(1.08);transform:scale(1.08)}
+    .site-preloader__bg::after{content:"";position:absolute;inset:0;background:linear-gradient(125deg,rgba(4,8,18,.78) 0%,rgba(4,10,22,.55) 50%,rgba(4,8,18,.8) 100%),radial-gradient(ellipse 55% 45% at 72% 38%,rgba(110,190,255,.14),transparent 60%)}
   </style>
   <script src="js/inapp-browser.js"></script>
   <link rel="icon" href="favicon.ico" sizes="any">
@@ -40,6 +43,7 @@
 </head>
 <body class="page-gallery">
   <div id="site-preloader" class="site-preloader" aria-live="polite" aria-busy="true">
+    <div class="site-preloader__bg" aria-hidden="true"></div>
     <div class="site-preloader__inner">
       <img class="site-preloader__logo" src="assets/brand/logo-mark-white.svg" alt="" width="108" height="113">
       <p class="site-preloader__wordmark">SPHERA FILMS</p>

@@ -90,13 +90,13 @@ export async function finishPreloader() {
   const bar = document.querySelector(".site-preloader__bar");
   if (bar) bar.setAttribute("aria-valuenow", "100");
 
-  document.documentElement.classList.remove("is-loading");
-  document.documentElement.classList.add("is-revealed");
-
   if (el) {
     el.classList.add("is-done");
     el.setAttribute("aria-busy", "false");
-    await new Promise((r) => window.setTimeout(r, 480));
+    await new Promise((r) => window.setTimeout(r, 520));
     el.remove();
   }
+
+  document.documentElement.classList.remove("is-loading");
+  document.documentElement.classList.add("is-revealed");
 }

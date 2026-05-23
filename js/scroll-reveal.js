@@ -11,7 +11,7 @@ function isMobileViewport() {
   return window.matchMedia(MOBILE_MQ).matches;
 }
 
-function disableScrollReveal(root = document) {
+export function disableScrollReveal(root = document) {
   document.documentElement.classList.add("no-scroll-reveal");
   root.querySelectorAll(REVEAL_SELECTOR).forEach((el) => {
     el.classList.remove("is-outview");
