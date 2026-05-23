@@ -6,13 +6,14 @@ import sharp from "sharp";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = join(__dirname, "..");
 const branding = join(root, "branding");
+const RASTER_DPI = 600;
 
 async function rasterize(svgName, pngName, w, h = w, bg = null) {
   const svg = readFileSync(join(branding, svgName));
   const bgOpt = bg ?? { r: 0, g: 0, b: 0, alpha: 0 };
-  await sharp(svg, { density: 300 })
-    .resize(w, h, { fit: "fill", background: bgOpt })
-    .png()
+  await sharp(svg, { density: RASTER_DPI })
+    .resize(w, h, { fit: "fill", background: bgOpt, kernel: sharp.kernel.lanczos3 })
+    .png({ compressionLevel: 9, adaptiveFiltering: true })
     .toFile(join(branding, pngName));
   console.log("Wrote", pngName);
 }

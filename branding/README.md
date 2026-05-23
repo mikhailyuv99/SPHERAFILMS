@@ -1,14 +1,24 @@
 # Sphera Films — branding
 
+## Vector (preferred — never blurry)
 | File | Use |
 |------|-----|
-| `favicon.svg` / `favicon.ico` | Black logo mark, transparent background, max size |
-| `og-image.png` | Black logo + SPHERA FILMS (Syne 600) on white (1200×630) |
-| `logo-mark-black-on-white.svg` | Social / Apple touch source |
-| `logo-mark-white-on-black.svg` | Dark-mode social source |
-| `apple-touch-icon.png` | Logo mark on white (180×180) |
-| `apple-touch-icon-dark.png` | Logo mark on black (180×180) |
-| `instagram-profile.png` | Logo mark on white (320×320) |
-| `instagram-profile-dark.png` | Logo mark on black (320×320) |
+| `favicon.svg` | Favicon (white mark, transparent) |
+| `apple-touch-icon.svg` | Apple touch source (black on white) |
+| `apple-touch-icon-dark.svg` | Apple touch dark (white on black) |
+| `instagram-profile.svg` | Instagram / social (black on white) |
+| `instagram-profile-dark.svg` | Instagram dark (white on black) |
+| `og-image.svg` | OG source (logo only; wordmark added in PNG export) |
 
-Wordmark: **SPHERA FILMS** — Syne 600, letter-spacing 0.42em, text-indent 0.42em.
+## Raster (for HTML meta / upload slots that require PNG)
+| File | Use |
+|------|-----|
+| `favicon.ico` / `favicon-*.png` | Browser favicons (from SVG @ 600 DPI) |
+| `apple-touch-icon.png` | Apple touch (180×180) |
+| `apple-touch-icon-dark.png` | Apple touch dark |
+| `instagram-profile.png` | Instagram profile (320×320) |
+| `instagram-profile-dark.png` | Instagram dark |
+| `og-image.png` | OG / Twitter card (1200×630, Syne wordmark) |
+
+Logo is centered from measured path bounds. PNGs are rasterized from SVG at 600 DPI.
+Wordmark: **SPHERA FILMS** — Syne 600, letter-spacing 0.42em.

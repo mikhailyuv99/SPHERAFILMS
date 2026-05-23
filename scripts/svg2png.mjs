@@ -8,7 +8,7 @@ const bg =
     ? { r: 0, g: 0, b: 0, alpha: 0 }
     : { r: 255, g: 255, b: 255, alpha: 1 };
 
-await sharp(svg, { density: 300 })
-  .resize(Number(w), Number(h), { fit: "fill", background: bg })
+await sharp(svg, { density: 600 })
+  .resize(Number(w), Number(h), { fit: "fill", background: bg, kernel: sharp.kernel.lanczos3 })
   .png()
   .toFile(pngPath);

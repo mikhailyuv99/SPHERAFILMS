@@ -481,8 +481,7 @@ html.is-inapp body {
   pointer-events: auto;
   padding-bottom: 6px;
   isolation: isolate;
-  contain: layout style paint;
-  transform: translateZ(0);
+  contain: paint;
 }
 
 .hero-videos__row.is-paused .hero-videos__track {
@@ -493,17 +492,8 @@ html.is-inapp body {
   overflow: hidden;
   pointer-events: auto;
   padding: 3px 0 5px;
-  contain: strict;
   mask-image: linear-gradient(90deg, transparent, #000 3%, #000 97%, transparent);
   -webkit-mask-image: linear-gradient(90deg, transparent, #000 3%, #000 97%, transparent);
-}
-
-.hero-videos__mover {
-  display: flex;
-  width: max-content;
-  will-change: transform;
-  backface-visibility: hidden;
-  transform: translate3d(0, 0, 0);
 }
 
 .hero-videos__track {
@@ -514,17 +504,25 @@ html.is-inapp body {
   backface-visibility: hidden;
 }
 
-.hero-videos__track--fwd,
+.hero-videos__track--fwd {
+  animation: heroVideoMarqueeFwd 48s linear infinite;
+}
+
 .hero-videos__track--rev {
-  animation: none;
+  animation: heroVideoMarqueeRev 44s linear infinite;
 }
 
 .hero-videos__set {
-  display: contents;
+  display: flex;
+  align-items: stretch;
+  gap: var(--hero-video-gap, 12px);
+  flex-shrink: 0;
 }
 
 .hero-video-card {
   flex: 0 0 clamp(260px, 44vw, 520px);
+  width: clamp(260px, 44vw, 520px);
+  min-height: 0;
   border: 1px solid var(--line);
   background: #0a0a0a;
   pointer-events: auto;
@@ -537,9 +535,9 @@ html.is-inapp body {
 
 .hero-video-card__media {
   position: relative;
+  width: 100%;
   aspect-ratio: 16 / 9;
   overflow: hidden;
-  contain: paint;
 }
 
 .hero-video-card__play {
@@ -589,40 +587,14 @@ html.is-inapp body {
   pointer-events: none;
 }
 
+.hero-video-card__media.is-playing {
+  contain: paint;
+}
+
 .hero-video-card__player {
   position: absolute;
   inset: 0;
   z-index: 2;
-}
-
-.hero-video-card__player {
-  display: none;
-}
-
-.hero-video-hover-player {
-  position: fixed;
-  left: 0;
-  top: 0;
-  z-index: 40;
-  pointer-events: none;
-  overflow: hidden;
-  border: 1px solid rgba(142, 200, 255, 0.45);
-  background: #0a0a0a;
-  contain: strict;
-  isolation: isolate;
-  will-change: transform;
-}
-
-.hero-video-hover-player__iframe {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 100%;
-  height: 100%;
-  min-width: 100%;
-  min-height: 100%;
-  border: 0;
-  transform: translate(-50%, -50%) scale(1.2);
   pointer-events: none;
 }
 
@@ -817,6 +789,8 @@ html.is-inapp body {
   padding-block: 2.5rem 3.5rem;
   border-block: 1px solid var(--line);
   background: rgba(0, 0, 0, 0.28);
+  isolation: isolate;
+  contain: paint;
 }
 
 .brands__label,
