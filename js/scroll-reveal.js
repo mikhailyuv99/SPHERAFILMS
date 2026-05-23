@@ -1,9 +1,23 @@
 /**
  * Scroll reveal — fade in/out on enter/leave (works with Lenis smooth scroll)
+ * Disabled on mobile — opacity/transform transitions break lazy media and marquees.
  */
 const REVEAL_SELECTOR = ".reveal, [data-reveal], [data-aos]";
+const MOBILE_MQ = "(max-width: 900px)";
 
 let observer = null;
+
+function isMobileViewport() {
+  return window.matchMedia(MOBILE_MQ).matches;
+}
+
+function disableScrollReveal(root = document) {
+  document.documentElement.classList.add("no-scroll-reveal");
+  root.querySelectorAll(REVEAL_SELECTOR).forEach((el) => {
+    el.classList.remove("is-outview");
+    el.classList.add("is-inview");
+  });
+}
 
 function onIntersect(entries) {
   for (const entry of entries) {
@@ -38,15 +52,17 @@ export function applySectionReveal(root = document) {
 
 export function initScrollReveal(root = document) {
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  if (isMobileViewport() || reduceMotion) {
+    disableScrollReveal(root);
+    return;
+  }
+
+  document.documentElement.classList.remove("no-scroll-reveal");
   applySectionReveal(root);
 
   const elements = [...root.querySelectorAll(REVEAL_SELECTOR)].filter(shouldReveal);
   if (!elements.length) return;
-
-  if (reduceMotion) {
-    elements.forEach((el) => el.classList.add("is-inview"));
-    return;
-  }
 
   if (observer) {
     observer.disconnect();

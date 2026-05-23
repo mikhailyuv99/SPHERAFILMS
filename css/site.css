@@ -1749,6 +1749,25 @@ body.lightbox-open {
 
 /* Mobile */
 @media (max-width: 900px) {
+  /* No scroll-reveal — content visible immediately; Lenis scroll only */
+  html:not(.is-revealed) body,
+  html.is-revealed body {
+    opacity: 1;
+    transition: none;
+  }
+
+  .reveal,
+  [data-reveal],
+  [data-aos],
+  html.no-scroll-reveal .reveal,
+  html.no-scroll-reveal [data-reveal],
+  html.no-scroll-reveal [data-aos] {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+    will-change: auto !important;
+  }
+
   .section-head--split {
     grid-template-columns: 1fr;
     align-items: start;
@@ -1856,6 +1875,10 @@ body.lightbox-open {
   .page-gallery .gallery-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 8px;
+  }
+
+  .page-gallery .gallery-grid__cell:last-child {
+    display: none;
   }
 
   .page-gallery .gallery-grid__cell {
